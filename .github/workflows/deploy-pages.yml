@@ -1,6 +1,7 @@
 name: Deploy GitHub Pages
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -39,6 +40,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
