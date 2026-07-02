@@ -1,0 +1,9 @@
+{
+  "idea": "Innercast as an inline pre-build review layer for AI agent users",
+  "targetUser": "Solo builders who already use Codex, Claude, Gemini, or similar agents",
+  "constraints": "Do not require a separate dashboard for the default workflow",
+  "temptedBuild": "A full web service with accounts, agent marketplace, and analytics",
+  "context": "Local coding workflow, prompt handoff, optional adapter packs",
+  "adapter": "codex",
+  "format": "markdown"
+}

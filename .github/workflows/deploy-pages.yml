@@ -1,6 +1,7 @@
 name: Deploy GitHub Pages
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -27,6 +28,10 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
+      - name: Validate Innercast kit
+        run: npm run validate:innercast
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate
       - name: Build
         run: npm run build
       - name: Upload artifact
@@ -35,6 +40,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

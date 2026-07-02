@@ -12,21 +12,30 @@ Claude, Gemini, or another AI builder:
 | Forge | Builder | Cuts the surviving idea down to a 7-day proof. |
 | Verdict | Director | Resolves the run into Kill, Narrow, or Build. |
 
-This repository is the GitHub Pages landing site and local playground for
-Innercast. The installable agent skill and generated adapters live in
-`../innercast/` in the current workspace export.
+The bundled persona names are still candidate names until the naming system is
+approved. The current product contract keeps that status visible inside the
+installable kit.
 
 ## Repository Status
 
-This folder is repo-ready, but it is not connected to a GitHub remote yet.
+This is the public source repository for Innercast:
 
-Expected public repository shape:
+- Repository: <https://github.com/heznpc/innercast>
+- GitHub Pages: <https://heznpc.github.io/innercast/>
+- Default branch: `main`
+
+The repository contains both the multilingual landing page and the installable
+Innercast kit source.
+
+## Repository Layout
 
 ```text
-README.md                 English-only project README
-src/                      Multilingual landing page and local playground
-public/                   Static downloadable artifacts
-.github/workflows/        GitHub Pages deployment workflow
+innercast/                  Skill, roster, adapters, pack tools, and validator
+docs/user-guide.md          User guide for installing and running Innercast
+docs/surface-map.md         Surface and product-boundary notes
+src/                        Multilingual landing page and local playground
+public/innercast-kit.zip    Downloadable kit artifact for the Pages site
+.github/workflows/          GitHub Pages deployment and validation workflow
 ```
 
 ## Run Locally
@@ -42,7 +51,21 @@ Open:
 http://127.0.0.1:5176/
 ```
 
-## Build
+## Validate
+
+Run the Innercast kit validator:
+
+```bash
+npm run validate:innercast
+```
+
+Run the site build and kit validator:
+
+```bash
+npm run check
+```
+
+Run the production build only:
 
 ```bash
 npm run build
@@ -54,19 +77,40 @@ Preview the production build:
 npm run preview -- --port 4176
 ```
 
+## Installable Kit
+
+The source of the installable kit lives in `innercast/`.
+
+The current Pages download is `public/innercast-kit.zip`. It contains:
+
+- `SKILL.md`
+- `roster/innercast.roles.json`
+- Codex adapters in `adapters/codex/agents/*.toml`
+- Claude Code adapters in `adapters/claude/agents/*.md`
+- pack examples in `packs/*/innercast-pack.json`
+- management scripts in `scripts/*.mjs`
+
+Validate the source kit before publishing a new archive:
+
+```bash
+npm run validate:innercast
+```
+
 ## GitHub Pages
 
-The Pages workflow is already included at:
+The Pages workflow is included at:
 
 ```text
 .github/workflows/deploy-pages.yml
 ```
 
-After pushing this folder as a GitHub repository:
+The workflow runs:
 
-1. Set the default branch to `main`.
-2. Enable GitHub Pages with "GitHub Actions" as the source.
-3. Push to `main` or run the workflow manually.
+1. `npm ci`
+2. `npm run validate:innercast`
+3. `npm audit --audit-level=moderate`
+4. `npm run build`
+5. GitHub Pages artifact upload and deploy
 
 The Vite build uses a relative base path, so it works for both user/org pages
 and project pages.
@@ -84,22 +128,18 @@ locales:
 
 ## Product Boundary
 
-Innercast should not require users to visit a separate service for the default
-workflow. The primary surface is still the native agent layer:
+Innercast should not require users to visit a separate hosted service for the
+default workflow. The primary surface is the native agent layer:
 
 - Codex custom subagents
 - Claude Code custom agents
-- Prompt handoff for other AI apps
-- Shareable character packs
+- prompt handoff for other AI apps
+- shareable character packs
 
 The Pages site is for discovery, documentation, and a lightweight playground.
 
-## Related Workspace Artifacts
+## License
 
-```text
-../innercast/                    Current skill, roster, pack tools, adapters
-../innercast-user-guide.md        User guide for installing and running Innercast
-../innercast-surface-map.md       Surface and product boundary notes
-../innercast-kit.zip              Full export bundle
-../innercast-skill.zip            Skill-only export bundle
-```
+No open-source license has been selected yet. Until a license is added, this
+repository is public source, but reuse and redistribution are not granted by
+default.
