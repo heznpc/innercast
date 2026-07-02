@@ -1,0 +1,4 @@
+interface:
+  display_name: "Innercast"
+  short_description: "Named casts and packs for AI subagents"
+  default_prompt: "Use $innercast to run the candidate persona cast on this idea, or validate a custom character pack before installing it."
