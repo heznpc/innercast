@@ -9,7 +9,7 @@ Use `innercast/` as the primary surface.
 Why:
 - It lives inside the current AI-agent session.
 - It can run before implementation without context switching.
-- It now includes a canonical character roster plus generated Codex and Claude adapters.
+- It now includes a canonical character roster plus generated Codex, Claude, and Gemini adapters.
 - It makes Doubt, Spark, Forge, and Verdict appear as named persona workers where the host app supports custom subagents.
 - It includes shareable character packs, so custom casts can be exchanged without a hosted marketplace.
 
@@ -17,16 +17,19 @@ Files:
 - Canonical roster: `innercast/roster/innercast.roles.json`
 - Codex adapter: `innercast/adapters/codex/agents/*.toml`
 - Claude adapter: `innercast/adapters/claude/agents/*.md`
+- Gemini adapter: `innercast/adapters/gemini/agents/*.md`
 - User guide: `docs/user-guide.md`
 - Installer: `innercast/scripts/install-adapters.mjs`
 - Pack manager: `innercast/scripts/innercast-pack.mjs`
+- Kit packager: `innercast/scripts/package-kit.mjs`
 - Pack examples: `innercast/packs/*/innercast-pack.json`
 - Validator: `innercast/scripts/validate.mjs`
 
 Support:
 - Codex: yes, via custom subagent TOML and `nickname_candidates`.
 - Claude Code: yes, via `.claude/agents/*.md` frontmatter and agent teams/subagents.
-- Gemini or other AI apps: only if they expose a comparable native agent definition surface; otherwise use the harness prompt.
+- Gemini CLI: yes, via `.gemini/agents/*.md` or `~/.gemini/agents/*.md` Markdown subagents.
+- Other AI apps: use the harness prompt unless they expose a comparable native agent definition surface.
 
 ## Shareable Surface: Character Packs
 
@@ -36,7 +39,7 @@ Why:
 - A pack is just `innercast-pack.json` plus generated adapters.
 - Users can publish packs in a repo, zip, or local folder.
 - Pack-installed agents are namespaced as `<pack-id>-<character-id>`, preventing accidental overwrites.
-- The same pack can export Codex TOML and Claude Markdown adapters.
+- The same pack can export Codex TOML, Claude Markdown, and Gemini Markdown adapters.
 - `doctor` flags pack-shape risks before install, and `diff` shows character changes between pack versions.
 
 ## Repeatable Surface: Harness
@@ -67,7 +70,7 @@ Build an MCP server only after Innercast needs shared state, callable tools, or 
 Good MCP reasons:
 - list saved innercasts
 - run a cast from multiple AI apps
-- install or validate adapter files for Codex and Claude
+- install or validate adapter files for Codex, Claude, and Gemini
 - export handoffs to local files
 - connect the same journal to Codex, Claude, and Gemini
 

@@ -191,7 +191,7 @@ const adapterLine = (adapter, pack = null) => {
       return `If Claude Code subagents ${joined} are available, dispatch one role per agent and require the final character to resolve the signal. If they are not installed, simulate the same character contracts in separate sections.`;
     }
     if (adapter === "gemini") {
-      return `If Gemini skills, gems, or extensions can represent the pack, run each character separately. Otherwise simulate each character contract in a separate section.`;
+      return `If Gemini CLI subagents ${joined} are installed in .gemini/agents or ~/.gemini/agents, invoke them explicitly with @<agent-id> or delegate one task per character. If they are not installed, simulate the same character contracts in separate sections.`;
     }
     return "If role-specific agents are available, run one role per character. If not, simulate the pack characters in separate sections without blending responsibilities.";
   }
@@ -203,7 +203,7 @@ const adapterLine = (adapter, pack = null) => {
     return "If Claude Code subagents named doubt, spark, forge, and verdict are available, dispatch one role per agent and require Verdict to resolve the final signal.";
   }
   if (adapter === "gemini") {
-    return "If Gemini skills or extensions are available, run each role as a separate section and keep the Director as the final resolver.";
+    return "If Gemini CLI subagents doubt, spark, forge, and verdict are installed in .gemini/agents or ~/.gemini/agents, invoke them explicitly with @doubt, @spark, @forge, and @verdict. If they are not installed, simulate the roles in separate sections and keep Verdict as the final resolver.";
   }
   return "If role-specific agents are available, run one role per agent. If not, simulate the roles in separate sections without blending responsibilities.";
 };

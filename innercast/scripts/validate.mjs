@@ -57,8 +57,10 @@ for (const character of roster.characters) {
 
   const codexPath = path.join(root, "adapters", "codex", "agents", `${character.id}.toml`);
   const claudePath = path.join(root, "adapters", "claude", "agents", `${character.id}.md`);
+  const geminiPath = path.join(root, "adapters", "gemini", "agents", `${character.id}.md`);
   const codex = fs.readFileSync(codexPath, "utf8");
   const claude = fs.readFileSync(claudePath, "utf8");
+  const gemini = fs.readFileSync(geminiPath, "utf8");
   if (!codex.includes(`name = "${character.id}"`)) fail(`Codex adapter has wrong name: ${codexPath}`);
   if (!codex.includes(`nickname_candidates = ["${character.displayName}"]`)) {
     fail(`Codex adapter missing display nickname: ${codexPath}`);
@@ -72,8 +74,15 @@ for (const character of roster.characters) {
   if (!claude.includes("Naming status: candidate")) {
     fail(`Claude adapter must disclose candidate naming status: ${claudePath}`);
   }
+  if (!gemini.startsWith("---\n")) fail(`Gemini adapter missing frontmatter: ${geminiPath}`);
+  if (!gemini.includes(`name: ${character.id}`)) fail(`Gemini adapter has wrong name: ${geminiPath}`);
+  if (!gemini.includes("kind: local")) fail(`Gemini adapter missing kind: ${geminiPath}`);
+  if (!gemini.includes("  - read_file")) fail(`Gemini adapter missing read_file tool: ${geminiPath}`);
+  if (!gemini.includes("Naming status: candidate")) {
+    fail(`Gemini adapter must disclose candidate naming status: ${geminiPath}`);
+  }
   if (character.id === "verdict") {
-    for (const [label, text] of [["Codex", codex], ["Claude", claude]]) {
+    for (const [label, text] of [["Codex", codex], ["Claude", claude], ["Gemini", gemini]]) {
       if (!text.includes("\nSignal: Kill / Narrow / Build\n\n1. Why This Signal")) {
         fail(`${label} Verdict adapter must keep Signal as an unnumbered lead line.`);
       }
@@ -134,6 +143,8 @@ try {
     path.join(exportDir, "codex", "agents", "innercast-default-verdict.toml"),
     path.join(exportDir, "claude", "agents", "innercast-default-doubt.md"),
     path.join(exportDir, "claude", "agents", "innercast-default-verdict.md"),
+    path.join(exportDir, "gemini", "agents", "innercast-default-doubt.md"),
+    path.join(exportDir, "gemini", "agents", "innercast-default-verdict.md"),
   ]) {
     if (!fs.existsSync(file)) fail(`Pack export missing file: ${file}`);
   }
@@ -159,5 +170,6 @@ try {
 
 runNode([packScript, "install", "innercast-default", "--all", "--dry-run"]);
 runNode([packScript, "uninstall", "innercast-default", "--all", "--dry-run"]);
+runNode([path.join(root, "scripts", "install-adapters.mjs"), "--gemini", "--dry-run"]);
 
 process.stdout.write(`Innercast validation passed for ${roster.characters.length} characters and bundled packs.\n`);

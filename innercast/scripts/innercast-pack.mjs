@@ -17,7 +17,7 @@ Usage:
   node scripts/innercast-pack.mjs validate <pack-id-or-path>
   node scripts/innercast-pack.mjs doctor <pack-id-or-path>
   node scripts/innercast-pack.mjs diff <pack-a-id-or-path> <pack-b-id-or-path>
-  node scripts/innercast-pack.mjs export <pack-id-or-path> --out DIR [--codex] [--claude] [--force]
+  node scripts/innercast-pack.mjs export <pack-id-or-path> --out DIR [--codex] [--claude] [--gemini] [--force]
   node scripts/innercast-pack.mjs install <pack-id-or-path> --all --dry-run
   node scripts/innercast-pack.mjs uninstall <pack-id-or-path> --all --dry-run
 
@@ -27,11 +27,13 @@ Options:
   --out DIR            Export directory
   --codex              Include Codex agent TOML files
   --claude             Include Claude Code agent Markdown files
-  --all                Include Codex and Claude surfaces
+  --gemini             Include Gemini CLI agent Markdown files
+  --all                Include Codex, Claude, and Gemini surfaces
   --dry-run            Print actions without writing files
   --force              Overwrite or remove changed files
   --codex-dir DIR      Default: ~/.codex/agents
   --claude-dir DIR     Default: ~/.claude/agents
+  --gemini-dir DIR     Default: ~/.gemini/agents
   --help
 `;
 
@@ -66,10 +68,12 @@ const parseArgs = (argv) => {
     outDir: undefined,
     codex: false,
     claude: false,
+    gemini: false,
     dryRun: false,
     force: false,
     codexDir: path.join(home, ".codex", "agents"),
     claudeDir: path.join(home, ".claude", "agents"),
+    geminiDir: path.join(home, ".gemini", "agents"),
   };
 
   if (!command || command === "--help" || command === "-h" || command === "help") {
@@ -92,12 +96,14 @@ const parseArgs = (argv) => {
     if (arg === "--help" || arg === "-h") parsed.help = true;
     else if (arg === "--codex") parsed.codex = true;
     else if (arg === "--claude") parsed.claude = true;
+    else if (arg === "--gemini") parsed.gemini = true;
     else if (arg === "--all") {
       parsed.codex = true;
       parsed.claude = true;
+      parsed.gemini = true;
     } else if (arg === "--dry-run") parsed.dryRun = true;
     else if (arg === "--force") parsed.force = true;
-    else if (["--packs-dir", "--name", "--out", "--codex-dir", "--claude-dir"].includes(arg)) {
+    else if (["--packs-dir", "--name", "--out", "--codex-dir", "--claude-dir", "--gemini-dir"].includes(arg)) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) fail(`Missing value for ${arg}`);
       index += 1;
@@ -108,6 +114,7 @@ const parseArgs = (argv) => {
         if (arg === "--out") parsed.outDir = resolved;
         if (arg === "--codex-dir") parsed.codexDir = resolved;
         if (arg === "--claude-dir") parsed.claudeDir = resolved;
+        if (arg === "--gemini-dir") parsed.geminiDir = resolved;
       }
     } else {
       fail(`Unknown option: ${arg}`);
@@ -319,10 +326,26 @@ color: ${character.color}
 ${renderInstructions(pack, character)}
 `;
 
+const renderGemini = (pack, character) => `---
+name: ${agentId(pack, character)}
+description: ${quoteYaml(`[${pack.name}] ${character.description}`)}
+kind: local
+tools:
+  - read_file
+  - grep_search
+model: inherit
+temperature: 0.2
+max_turns: 8
+---
+
+${renderInstructions(pack, character)}
+`;
+
 const renderedFiles = (pack, options) => {
   const files = [];
   const includeCodex = options.codex;
   const includeClaude = options.claude;
+  const includeGemini = options.gemini;
 
   for (const character of pack.characters) {
     if (includeCodex) {
@@ -339,6 +362,13 @@ const renderedFiles = (pack, options) => {
         content: renderClaude(pack, character),
       });
     }
+    if (includeGemini) {
+      files.push({
+        surface: "gemini",
+        name: `${agentId(pack, character)}.md`,
+        content: renderGemini(pack, character),
+      });
+    }
   }
   return files;
 };
@@ -350,7 +380,13 @@ const writeFileSafe = (target, content, options, actions) => {
       actions.push(`skip unchanged ${target}`);
       return;
     }
-    if (!options.force) fail(`Refusing to overwrite changed file: ${target}\nRe-run with --force if this is intentional.`);
+    if (!options.force) {
+      if (options.dryRun) {
+        actions.push(`would refuse changed ${target} (use --force to overwrite)`);
+        return;
+      }
+      fail(`Refusing to overwrite changed file: ${target}\nRe-run with --force if this is intentional.`);
+    }
     actions.push(`overwrite ${target}`);
   } else {
     actions.push(`write ${target}`);
@@ -368,6 +404,10 @@ const removeFileSafe = (target, content, options, actions) => {
   }
   const current = fs.readFileSync(target, "utf8");
   if (current !== content && !options.force) {
+    if (options.dryRun) {
+      actions.push(`would refuse changed ${target} (use --force to remove)`);
+      return;
+    }
     fail(`Refusing to remove changed file: ${target}\nRe-run with --force if this is intentional.`);
   }
   actions.push(`remove ${target}`);
@@ -375,13 +415,14 @@ const removeFileSafe = (target, content, options, actions) => {
 };
 
 const ensureSurfaceSelection = (options, command) => {
-  if (!options.codex && !options.claude) {
+  if (!options.codex && !options.claude && !options.gemini) {
     if (command === "export") {
       options.codex = true;
       options.claude = true;
+      options.gemini = true;
       return;
     }
-    fail(`Choose --codex, --claude, or --all for ${command}.`);
+    fail(`Choose --codex, --claude, --gemini, or --all for ${command}.`);
   }
 };
 
@@ -530,7 +571,11 @@ const exportPack = (pack, options) => {
   const actions = [];
   writeFileSafe(path.join(options.outDir, "innercast-pack.json"), `${JSON.stringify(pack, null, 2)}\n`, options, actions);
   for (const file of renderedFiles(pack, options)) {
-    const surfaceDir = file.surface === "codex" ? path.join("codex", "agents") : path.join("claude", "agents");
+    const surfaceDir = file.surface === "codex"
+      ? path.join("codex", "agents")
+      : file.surface === "claude"
+        ? path.join("claude", "agents")
+        : path.join("gemini", "agents");
     writeFileSafe(path.join(options.outDir, surfaceDir, file.name), file.content, options, actions);
   }
   process.stdout.write(`Exported ${pack.name}:\n${actions.map((action) => `- ${action}`).join("\n")}\n`);
@@ -540,7 +585,11 @@ const installPack = (pack, options, uninstall = false) => {
   ensureSurfaceSelection(options, uninstall ? "uninstall" : "install");
   const actions = [];
   for (const file of renderedFiles(pack, options)) {
-    const targetDir = file.surface === "codex" ? options.codexDir : options.claudeDir;
+    const targetDir = file.surface === "codex"
+      ? options.codexDir
+      : file.surface === "claude"
+        ? options.claudeDir
+        : options.geminiDir;
     const target = path.join(targetDir, file.name);
     if (uninstall) removeFileSafe(target, file.content, options, actions);
     else writeFileSafe(target, file.content, options, actions);

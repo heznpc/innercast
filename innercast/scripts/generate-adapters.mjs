@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rosterPath = path.join(root, "roster", "innercast.roles.json");
 const codexDir = path.join(root, "adapters", "codex", "agents");
 const claudeDir = path.join(root, "adapters", "claude", "agents");
+const geminiDir = path.join(root, "adapters", "gemini", "agents");
 
 const roster = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
 const checkOnly = process.argv.includes("--check");
@@ -62,6 +63,21 @@ color: ${character.color}
 ${renderInstructions(character)}
 `;
 
+const renderGemini = (character) => `---
+name: ${character.id}
+description: ${character.description}
+kind: local
+tools:
+  - read_file
+  - grep_search
+model: inherit
+temperature: 0.2
+max_turns: 8
+---
+
+${renderInstructions(character)}
+`;
+
 const expectedFiles = () => {
   const files = [];
   for (const character of roster.characters) {
@@ -72,6 +88,10 @@ const expectedFiles = () => {
     files.push({
       path: path.join(claudeDir, `${character.id}.md`),
       content: renderClaude(character),
+    });
+    files.push({
+      path: path.join(geminiDir, `${character.id}.md`),
+      content: renderGemini(character),
     });
   }
   return files;
@@ -94,13 +114,15 @@ if (checkOnly) {
 
 fs.rmSync(codexDir, { recursive: true, force: true });
 fs.rmSync(claudeDir, { recursive: true, force: true });
+fs.rmSync(geminiDir, { recursive: true, force: true });
 fs.mkdirSync(codexDir, { recursive: true });
 fs.mkdirSync(claudeDir, { recursive: true });
+fs.mkdirSync(geminiDir, { recursive: true });
 
 for (const file of expectedFiles()) {
   fs.writeFileSync(file.path, file.content);
 }
 
 process.stdout.write(
-  `Generated ${roster.characters.length} Codex agents and ${roster.characters.length} Claude agents.\n`,
+  `Generated ${roster.characters.length} Codex agents, ${roster.characters.length} Claude agents, and ${roster.characters.length} Gemini agents.\n`,
 );

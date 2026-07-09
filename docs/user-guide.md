@@ -1,6 +1,6 @@
 # Innercast User Guide
 
-Innercast is a character roster for multi-agent coding sessions. It makes the subagents in Codex or Claude Code show up as a reusable cast:
+Innercast is a character roster for multi-agent coding sessions. It makes the subagents in Codex, Claude Code, or Gemini CLI show up as a reusable cast:
 
 The bundled character names are candidate persona names until explicitly approved. Use `doctor` before treating any pack's names as brand/IP.
 
@@ -17,6 +17,7 @@ From the `innercast` folder:
 
 ```bash
 node scripts/validate.mjs
+node scripts/package-kit.mjs
 node scripts/innercast-harness.mjs --json examples/sample-idea.json --format markdown
 ```
 
@@ -99,6 +100,12 @@ Claude Code agents:
 node scripts/install-adapters.mjs --claude
 ```
 
+Gemini CLI agents:
+
+```bash
+node scripts/install-adapters.mjs --gemini
+```
+
 Codex skill:
 
 ```bash
@@ -120,6 +127,14 @@ Use the doubt, spark, forge, and verdict agents to run Innercast on this idea. K
 ```
 
 Claude Code uses the generated files in `adapters/claude/agents/*.md`.
+
+## Use In Gemini CLI
+
+```text
+Run Innercast. If the agents are installed, invoke @doubt, @spark, @forge, and @verdict separately. Keep the first three findings separate, then ask @verdict for Kill/Narrow/Build.
+```
+
+Gemini CLI uses the generated files in `adapters/gemini/agents/*.md`.
 
 ## Generic Prompt Handoff
 

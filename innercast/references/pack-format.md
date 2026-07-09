@@ -74,4 +74,6 @@ node scripts/innercast-pack.mjs install innercast-default --all --dry-run
 node scripts/innercast-pack.mjs uninstall innercast-default --all --dry-run
 ```
 
+Exported packs can include Codex TOML files, Claude Code Markdown files, and Gemini CLI Markdown files. `--all` includes all three native surfaces.
+
 Run install without `--dry-run` only after checking the target file list.

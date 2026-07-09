@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "validate:innercast": "node innercast/scripts/validate.mjs",
-    "check": "npm run validate:innercast && npm run build"
+    "package:innercast": "node innercast/scripts/package-kit.mjs",
+    "check": "npm run validate:innercast && npm run package:innercast && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

@@ -1,6 +1,6 @@
 ---
 name: innercast
-description: Character-driven pre-build review and native subagent roster for ideas, features, apps, agent workflows, plugins, or launches. Use when the user wants a critical idea review, named persona characters like Doubt/Spark/Forge/Verdict, Codex or Claude custom subagent handoff, shareable custom character agent packs, Kill/Narrow/Build guidance, or a prompt before asking another AI app to build.
+description: Character-driven pre-build review and native subagent roster for ideas, features, apps, agent workflows, plugins, or launches. Use when the user wants a critical idea review, named persona characters like Doubt/Spark/Forge/Verdict, Codex, Claude, or Gemini custom subagent handoff, shareable custom character agent packs, Kill/Narrow/Build guidance, or a prompt before asking another AI app to build.
 ---
 
 # Innercast
@@ -58,7 +58,7 @@ Default to `Narrow` when the idea is plausible but over-scoped.
 
 Use `scripts/innercast-harness.mjs` when the user wants a reusable prompt artifact, a file output, a hookable command, or a handoff for another AI app.
 
-Use `scripts/install-adapters.mjs` when the user wants to install the generated Codex or Claude subagents. Run with `--dry-run` first unless the user explicitly asks to install immediately.
+Use `scripts/install-adapters.mjs` when the user wants to install the generated Codex, Claude, or Gemini subagents. Run with `--dry-run` first unless the user explicitly asks to install immediately.
 
 Use `scripts/innercast-pack.mjs` when the user wants to list, validate, preview, export, install, uninstall, or share custom character packs. Run install and uninstall with `--dry-run` first.
 
@@ -85,6 +85,7 @@ Use `scripts/generate-adapters.mjs` after changing the roster. It generates:
 
 - `adapters/codex/agents/*.toml` for Codex custom subagents.
 - `adapters/claude/agents/*.md` for Claude Code custom subagents.
+- `adapters/gemini/agents/*.md` for Gemini CLI custom subagents.
 
 Do not maintain those adapter files by hand if the canonical role behavior changes. Update `roster/innercast.roles.json`, then regenerate. Use `scripts/generate-adapters.mjs --check` to detect stale adapters.
 

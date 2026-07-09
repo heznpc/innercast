@@ -32,6 +32,8 @@ jobs:
         run: npm run validate:innercast
       - name: Audit dependencies
         run: npm audit --audit-level=moderate
+      - name: Package Innercast kit
+        run: npm run package:innercast
       - name: Build
         run: npm run build
       - name: Upload artifact

@@ -30,7 +30,7 @@ Innercast kit source.
 ## Repository Layout
 
 ```text
-innercast/                  Skill, roster, adapters, pack tools, and validator
+innercast/                  Skill, roster, adapters, pack tools, packager, and validator
 docs/user-guide.md          User guide for installing and running Innercast
 docs/surface-map.md         Surface and product-boundary notes
 src/                        Multilingual landing page and local playground
@@ -65,6 +65,12 @@ Run the site build and kit validator:
 npm run check
 ```
 
+Rebuild the downloadable kit archive from `innercast/`:
+
+```bash
+npm run package:innercast
+```
+
 Run the production build only:
 
 ```bash
@@ -87,13 +93,15 @@ The current Pages download is `public/innercast-kit.zip`. It contains:
 - `roster/innercast.roles.json`
 - Codex adapters in `adapters/codex/agents/*.toml`
 - Claude Code adapters in `adapters/claude/agents/*.md`
+- Gemini CLI adapters in `adapters/gemini/agents/*.md`
 - pack examples in `packs/*/innercast-pack.json`
 - management scripts in `scripts/*.mjs`
 
-Validate the source kit before publishing a new archive:
+Validate and package the source kit before publishing a new archive:
 
 ```bash
 npm run validate:innercast
+npm run package:innercast
 ```
 
 ## GitHub Pages
@@ -109,8 +117,9 @@ The workflow runs:
 1. `npm ci`
 2. `npm run validate:innercast`
 3. `npm audit --audit-level=moderate`
-4. `npm run build`
-5. GitHub Pages artifact upload and deploy
+4. `npm run package:innercast`
+5. `npm run build`
+6. GitHub Pages artifact upload and deploy
 
 The Vite build uses a relative base path, so it works for both user/org pages
 and project pages.
@@ -133,6 +142,7 @@ default workflow. The primary surface is the native agent layer:
 
 - Codex custom subagents
 - Claude Code custom agents
+- Gemini CLI custom subagents
 - prompt handoff for other AI apps
 - shareable character packs
 
