@@ -1,0 +1,15 @@
+{
+  "name": "@heznpc/innercast-core",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./core": "./lib/core.mjs",
+    "./budget": "./lib/budget.mjs",
+    "./hosts": "./lib/host-adapters.mjs"
+  },
+  "bin": {
+    "innercast": "./scripts/innercast-engine.mjs"
+  }
+}

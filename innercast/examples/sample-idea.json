@@ -1,9 +1,8 @@
 {
-  "idea": "Innercast as an inline pre-build review layer for AI agent users",
-  "targetUser": "Solo builders who already use Codex, Claude, Gemini, or similar agents",
-  "constraints": "Do not require a separate dashboard for the default workflow",
-  "temptedBuild": "A full web service with accounts, agent marketplace, and analytics",
-  "context": "Local coding workflow, prompt handoff, optional adapter packs",
+  "decision": "Should Innercast remain a same-task character engine instead of becoming a hosted service?",
+  "context": "The current AI task can spawn named subagents, and the source already generates Codex, Claude, and Gemini adapters.",
+  "constraints": "The default workflow must stay local, preserve stable character identity, and work without an account or separate dashboard.",
+  "stakes": "Choosing the wrong boundary would turn the original character experience into a generic handoff product.",
   "adapter": "codex",
   "format": "markdown"
 }

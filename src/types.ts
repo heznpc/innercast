@@ -1,7 +1,7 @@
 export type Verdict = "Kill" | "Narrow" | "Build";
 export type Confidence = "Low" | "Medium" | "High";
 
-export type CouncilRole = "skeptic" | "advocate" | "builder" | "judge";
+export type CouncilRole = "skeptic" | "advocate" | "builder";
 
 export interface EvidenceGap {
   id: string;
@@ -30,7 +30,7 @@ export interface CourtCase {
   evidenceGaps: EvidenceGap[];
   nextActions: ActionItem[];
   councilNotes: Record<CouncilRole, string[]>;
-  handoffPrompt: string;
+  sessionPrompt: string;
   createdAt: string;
   updatedAt: string;
 }

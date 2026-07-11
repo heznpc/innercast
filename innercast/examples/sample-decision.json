@@ -1,0 +1,6 @@
+{
+  "decision": "Should Innercast ship as a host-agnostic character engine rather than a Codex-only kit?",
+  "context": "The same stable cast should run inside one person's session. Native hosts should use their own subagent surfaces; unsupported hosts should receive isolated prompts and a root synthesis prompt. The engine must remain local, deterministic, and model-free.",
+  "platform": "all",
+  "format": "json"
+}

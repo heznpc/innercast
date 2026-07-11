@@ -1,4 +1,4 @@
 interface:
   display_name: "Innercast"
-  short_description: "Named casts and packs for AI subagents"
-  default_prompt: "Use $innercast to run the candidate persona cast on this idea, or validate a custom character pack before installing it."
+  short_description: "Stable inner characters for same-task AI decisions"
+  default_prompt: "Use $innercast on this decision. Run the named inner characters in the current task, wait for their positions, then have the host make the final decision."

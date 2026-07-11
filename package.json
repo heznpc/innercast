@@ -1,15 +1,18 @@
 {
   "name": "innercast-site",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "innercast:plan": "node innercast/scripts/innercast-engine.mjs",
+    "test:innercast": "node --test innercast/tests/*.test.mjs",
+    "typecheck": "tsc --noEmit",
     "validate:innercast": "node innercast/scripts/validate.mjs",
     "package:innercast": "node innercast/scripts/package-kit.mjs",
-    "check": "npm run validate:innercast && npm run package:innercast && npm run build"
+    "check": "npm run typecheck && npm run test:innercast && npm run validate:innercast && npm run package:innercast && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

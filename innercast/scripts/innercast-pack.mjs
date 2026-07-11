@@ -4,6 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { normalizePack } from "../lib/core.mjs";
+import { nativeAgentId, renderAgentFiles } from "../lib/host-adapters.mjs";
+import { isMainModule, parseJsonFile, resolvePackPath } from "../lib/node-io.mjs";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const home = os.homedir();
 const defaultPacksDir = path.join(root, "packs");
@@ -38,10 +42,6 @@ Options:
 `;
 
 const expandHome = (value) => value.replace(/^~(?=$|\/)/, home);
-const quoteToml = (value) => JSON.stringify(value);
-const quoteYaml = (value) => JSON.stringify(value);
-const allowedColors = new Set(["red", "orange", "yellow", "green", "blue", "purple", "pink", "cyan"]);
-const allowedNamingStatuses = new Set(["prototype", "candidate", "approved"]);
 const riskyTextChecks = [
   { pattern: /\bapi\s*key\b/i, label: "mentions API keys" },
   { pattern: /\bsecret(s)?\b/i, label: "mentions secrets" },
@@ -54,8 +54,6 @@ const riskyTextChecks = [
 const fail = (message) => {
   throw new Error(message);
 };
-
-const isString = (value) => typeof value === "string" && value.trim().length > 0;
 
 const parseArgs = (argv) => {
   const command = argv[0];
@@ -124,97 +122,26 @@ const parseArgs = (argv) => {
   return parsed;
 };
 
-const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
-
 const findPackPath = (ref, packsDir) => {
-  if (!ref) fail("Missing pack id or path.");
-
-  const candidates = [];
-  const rawPath = path.resolve(expandHome(ref));
-  if (fs.existsSync(rawPath)) {
-    const stat = fs.statSync(rawPath);
-    candidates.push(stat.isDirectory() ? path.join(rawPath, "innercast-pack.json") : rawPath);
-  }
-  candidates.push(path.join(packsDir, ref, "innercast-pack.json"));
-  candidates.push(path.join(packsDir, `${ref}.json`));
-
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
-  }
-
-  fail(`Pack not found: ${ref}`);
+  return resolvePackPath(ref, packsDir);
 };
 
 const readPack = (ref, packsDir) => {
   const packPath = findPackPath(ref, packsDir);
-  const pack = readJson(packPath);
+  const pack = parseJsonFile(packPath, "Pack");
   validatePack(pack, packPath);
   return { pack, packPath };
 };
 
-const requireString = (object, field, label) => {
-  if (!isString(object[field])) fail(`${label} missing string field: ${field}`);
-};
-
-const requireSingleLine = (object, field, label) => {
-  requireString(object, field, label);
-  if (object[field].includes("\n")) fail(`${label} field must be single-line: ${field}`);
-};
-
-const requireStringArray = (object, field, label) => {
-  if (!Array.isArray(object[field]) || object[field].length === 0) {
-    fail(`${label} missing non-empty array field: ${field}`);
-  }
-  for (const item of object[field]) {
-    if (!isString(item)) fail(`${label} array contains empty value: ${field}`);
-    if (item.includes('"""')) fail(`${label} array contains unsupported TOML delimiter: ${field}`);
-  }
-};
-
 const validatePack = (pack, label = "<pack>") => {
-  if (pack.schema !== "innercast.pack.v1") fail(`${label} must use schema innercast.pack.v1.`);
-  for (const field of ["id", "name", "version", "description"]) {
-    requireSingleLine(pack, field, label);
+  if (pack?.protocol?.decisionOwner !== undefined && pack.protocol.decisionOwner !== "host") {
+    fail(`${label} pack protocol decisionOwner must be host.`);
   }
-  if (pack.namingStatus !== undefined) {
-    requireSingleLine(pack, "namingStatus", label);
-    if (!allowedNamingStatuses.has(pack.namingStatus)) {
-      fail(`${label} has invalid namingStatus: ${pack.namingStatus}`);
-    }
-  }
-  if (pack.namingNote !== undefined) requireSingleLine(pack, "namingNote", label);
+  normalizePack(pack, label);
   if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(pack.id)) {
     fail(`${label} has invalid pack id: ${pack.id}`);
   }
-  if (!Array.isArray(pack.characters) || pack.characters.length === 0) {
-    fail(`${label} must include at least one character.`);
-  }
-
-  const ids = new Set();
-  for (const character of pack.characters) {
-    const charLabel = `${pack.id}/${character.id || "<unknown>"}`;
-    for (const field of ["id", "displayName", "archetype", "color", "description", "oneLine"]) {
-      requireSingleLine(character, field, charLabel);
-    }
-    if (!/^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$|^[a-z0-9]$/.test(character.id)) {
-      fail(`${charLabel} has invalid character id: ${character.id}`);
-    }
-    if (ids.has(character.id)) fail(`${pack.id} duplicate character id: ${character.id}`);
-    ids.add(character.id);
-    if (!allowedColors.has(character.color)) {
-      fail(`${charLabel} has unsupported color: ${character.color}`);
-    }
-    if (character.displayName.length > 32) {
-      fail(`${charLabel} displayName must be 32 characters or shorter.`);
-    }
-    for (const field of ["focus", "rules", "returnSections"]) {
-      requireStringArray(character, field, charLabel);
-    }
-    if (character.leadLines !== undefined) requireStringArray(character, "leadLines", charLabel);
-    for (const field of ["description", "oneLine"]) {
-      if (character[field].includes('"""')) fail(`${charLabel} field contains unsupported TOML delimiter: ${field}`);
-    }
-  }
+  renderAgentFiles(pack, { hosts: ["codex"] });
 };
 
 const starterPack = (id, name) => ({
@@ -226,151 +153,60 @@ const starterPack = (id, name) => ({
   namingNote: "Role-descriptive starter persona names pending owner approval.",
   author: "Heznpc",
   description: "A custom Innercast character pack.",
+  protocol: {
+    scope: "current-task",
+    dispatch: "parallel",
+    decisionOwner: "host",
+    contextMode: "shared-decision",
+    synthesisLeadLines: ["Decision: <one clear choice>", "Confidence: Low / Medium / High"],
+    synthesisSections: ["Character Positions", "Main Tension", "Decision Rationale", "Risks Accepted", "Next Action"],
+  },
   characters: [
     {
       id: "doubt",
       displayName: "Doubt",
       archetype: "skeptic",
       color: "purple",
-      description: "Use to challenge weak assumptions before the idea becomes a build plan.",
+      description: "Use as the cautious inner voice to challenge weak assumptions and the cost of being wrong.",
       oneLine: "Doubt makes the soft spot visible.",
-      focus: ["weak assumptions", "missing proof", "avoidable complexity"],
-      rules: ["Do not flatter the idea.", "Tie each objection to a concrete failure mode."],
-      returnSections: ["Objections", "Evidence Gaps", "Fastest Kill Test"],
+      focus: ["weak assumptions", "missing proof", "irreversible downside"],
+      rules: ["You are one inner voice, not the final decision maker.", "Tie each objection to a concrete failure mode."],
+      returnSections: ["Position", "Risks", "Evidence", "Recommendation"],
     },
     {
       id: "spark",
       displayName: "Spark",
       archetype: "advocate",
       color: "yellow",
-      description: "Use to find the narrow version worth preserving.",
+      description: "Use as the possibility-seeking inner voice to find what is meaningful and worth preserving.",
       oneLine: "Spark keeps the useful possibility alive.",
-      focus: ["specific user", "repeated-use moment", "small promise"],
-      rules: ["Defend only the narrowest useful version.", "Name what should be dropped."],
-      returnSections: ["Strongest User", "Survival Case", "What To Preserve"],
+      focus: ["genuine desire", "plausible upside", "smallest worthwhile choice"],
+      rules: ["You are one inner voice, not the final decision maker.", "Defend only the most meaningful viable possibility."],
+      returnSections: ["Position", "Upside", "What To Preserve", "Recommendation"],
     },
     {
       id: "forge",
       displayName: "Forge",
       archetype: "builder",
       color: "blue",
-      description: "Use to turn the surviving idea into a small runnable proof.",
-      oneLine: "Forge turns the idea into something testable.",
-      focus: ["smallest artifact", "manual steps", "run command"],
-      rules: ["Do not build the polished version.", "End with a concrete validation step."],
-      returnSections: ["Smallest Build", "Keep Manual", "Validation Step"],
-    },
-    {
-      id: "verdict",
-      displayName: "Verdict",
-      archetype: "director",
-      color: "cyan",
-      description: "Use last to make one decision and three next moves.",
-      oneLine: "Verdict turns the room into a signal.",
-      focus: ["decision", "deciding evidence", "next actions"],
-      rules: ["Choose one signal.", "Limit next actions to exactly three."],
-      leadLines: ["Signal: Kill / Narrow / Build"],
-      returnSections: ["Why This Signal", "Deciding Evidence", "Next 3 Actions"],
+      description: "Use as the practical inner voice to find feasible paths and a reversible first move.",
+      oneLine: "Forge turns inner conflict into something actionable.",
+      focus: ["feasible options", "tradeoffs", "reversible first move"],
+      rules: ["You are one inner voice, not the final decision maker.", "End with a concrete recommendation."],
+      returnSections: ["Position", "Feasible Paths", "Tradeoffs", "Recommendation"],
     },
   ],
 });
 
-const agentId = (pack, character) => `${pack.id}-${character.id}`;
-
-const renderInstructions = (pack, character) => {
-  const focus = character.focus.map((item) => `- ${item}`).join("\n");
-  const rules = character.rules.map((item) => `- ${item}`).join("\n");
-  const leadLines = (character.leadLines || []).join("\n");
-  const sections = character.returnSections.map((item, index) => `${index + 1}. ${item}`).join("\n");
-  const returnBlock = [leadLines, sections].filter(Boolean).join("\n\n");
-  const namingNotice = pack.namingStatus && pack.namingStatus !== "approved"
-    ? `\nNaming status: ${pack.namingStatus}. ${pack.namingNote || "Do not treat this character name as final brand/IP."}\n`
-    : "";
-
-  return `You are ${character.displayName}, the ${character.archetype} in the ${pack.name} Innercast pack.
-
-Installed agent id: ${agentId(pack, character)}
-${namingNotice}
-
-${character.oneLine}
-
-Focus on:
-${focus}
-
-Rules:
-${rules}
-
-Return:
-${returnBlock}`;
-};
-
-const renderCodex = (pack, character) => `name = ${quoteToml(agentId(pack, character))}
-description = ${quoteToml(`[${pack.name}] ${character.description}`)}
-sandbox_mode = "read-only"
-model_reasoning_effort = "high"
-nickname_candidates = [${quoteToml(character.displayName)}]
-
-developer_instructions = """
-${renderInstructions(pack, character)}
-"""
-`;
-
-const renderClaude = (pack, character) => `---
-name: ${agentId(pack, character)}
-description: ${quoteYaml(`[${pack.name}] ${character.description}`)}
-tools: Read, Glob, Grep
-model: inherit
-color: ${character.color}
----
-
-${renderInstructions(pack, character)}
-`;
-
-const renderGemini = (pack, character) => `---
-name: ${agentId(pack, character)}
-description: ${quoteYaml(`[${pack.name}] ${character.description}`)}
-kind: local
-tools:
-  - read_file
-  - grep_search
-model: inherit
-temperature: 0.2
-max_turns: 8
----
-
-${renderInstructions(pack, character)}
-`;
+const agentId = (pack, character) => nativeAgentId(pack, character);
 
 const renderedFiles = (pack, options) => {
-  const files = [];
-  const includeCodex = options.codex;
-  const includeClaude = options.claude;
-  const includeGemini = options.gemini;
-
-  for (const character of pack.characters) {
-    if (includeCodex) {
-      files.push({
-        surface: "codex",
-        name: `${agentId(pack, character)}.toml`,
-        content: renderCodex(pack, character),
-      });
-    }
-    if (includeClaude) {
-      files.push({
-        surface: "claude",
-        name: `${agentId(pack, character)}.md`,
-        content: renderClaude(pack, character),
-      });
-    }
-    if (includeGemini) {
-      files.push({
-        surface: "gemini",
-        name: `${agentId(pack, character)}.md`,
-        content: renderGemini(pack, character),
-      });
-    }
-  }
-  return files;
+  const hosts = [
+    options.codex ? "codex" : null,
+    options.claude ? "claude" : null,
+    options.gemini ? "gemini" : null,
+  ].filter(Boolean);
+  return renderAgentFiles(pack, { hosts });
 };
 
 const writeFileSafe = (target, content, options, actions) => {
@@ -433,7 +269,7 @@ const listPacks = (options) => {
     if (!entry.isDirectory()) continue;
     const packPath = path.join(options.packsDir, entry.name, "innercast-pack.json");
     if (!fs.existsSync(packPath)) continue;
-    const pack = readJson(packPath);
+    const pack = parseJsonFile(packPath, "Pack");
     validatePack(pack, packPath);
     rows.push(`${pack.id}@${pack.version} - ${pack.name}: ${pack.description}`);
   }
@@ -494,11 +330,10 @@ const diagnosePack = (pack, packPath) => {
     warnings.push("Non-approved namingStatus should include namingNote.");
   }
   if (pack.characters.length < 2) warnings.push("Pack has fewer than two characters; it may not behave like a multi-agent cast.");
-  if (pack.characters.length > 8) warnings.push("Pack has more than eight characters; handoffs may become too large for routine use.");
-
-  const finalCharacter = pack.characters[pack.characters.length - 1];
-  if (!finalCharacter.leadLines || finalCharacter.leadLines.length === 0) {
-    warnings.push(`Final character ${finalCharacter.displayName} has no leadLines; final reports may lack a clear signal line.`);
+  if (pack.characters.length > 8) warnings.push("Pack has more than eight characters; cast outputs may become too large for routine use.");
+  if (!pack.protocol) warnings.push("Pack has no protocol; runtime will default to current-task parallel voices with the host as decision owner.");
+  if (pack.protocol && !pack.protocol.synthesisLeadLines) {
+    warnings.push("Pack protocol has no synthesisLeadLines; runtime defaults will supply Decision and Confidence lines.");
   }
 
   const displayNames = new Map();
@@ -556,6 +391,7 @@ const diffPacks = (left, right) => {
     compareValues(left.namingStatus, right.namingStatus) && compareValues(left.namingNote, right.namingNote)
       ? "Naming metadata: unchanged"
       : "Naming metadata: changed",
+    compareValues(left.protocol, right.protocol) ? "Protocol: unchanged" : "Protocol: changed",
     added.length ? `Added characters: ${added.join(", ")}` : "Added characters: none",
     removed.length ? `Removed characters: ${removed.join(", ")}` : "Removed characters: none",
     changed.length ? "Changed characters:" : "Changed characters: none",
@@ -637,9 +473,13 @@ const main = () => {
   else if (options.command === "uninstall") installPack(pack, options, true);
 };
 
-try {
-  main();
-} catch (error) {
-  process.stderr.write(`${error.message}\n\n${usage}`);
-  process.exit(1);
+if (isMainModule(import.meta.url)) {
+  try {
+    main();
+  } catch (error) {
+    process.stderr.write(`${error.message}\n\n${usage}`);
+    process.exit(1);
+  }
 }
+
+export { findPackPath, readPack, renderedFiles, starterPack, validatePack };

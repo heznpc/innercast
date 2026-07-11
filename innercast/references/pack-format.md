@@ -27,8 +27,50 @@ Optional top-level field:
 - `author`: public author or handle.
 - `namingStatus`: `prototype`, `candidate`, or `approved`.
 - `namingNote`: one-line rationale or review note for the current names.
+- `protocol`: recommended runtime contract. Legacy v1 packs without it use the
+  safe default below and receive a `doctor` warning.
 
 Treat names as not final unless `namingStatus` is `approved`.
+
+## Runtime Protocol
+
+The portable protocol is deliberately narrow:
+
+```json
+{
+  "protocol": {
+    "scope": "current-task",
+    "dispatch": "parallel",
+    "decisionOwner": "host",
+    "contextMode": "shared-decision",
+    "synthesisLeadLines": [
+      "Decision: <one clear choice>",
+      "Confidence: Low / Medium / High"
+    ],
+    "synthesisSections": [
+      "Character Positions",
+      "Main Tension",
+      "Decision Rationale",
+      "Risks Accepted",
+      "Next Action"
+    ]
+  }
+}
+```
+
+- `scope` must be `current-task`: the cast runs inside the person's current AI
+  task rather than creating a separate handoff service.
+- `dispatch` must be `parallel`: characters independently examine the same
+  brief.
+- `decisionOwner` must be `host`: character order never grants final authority.
+- `contextMode` must be `shared-decision`: the host passes the same decision
+  packet to every character.
+- `synthesisLeadLines` defines the host's unnumbered decision and confidence
+  fields. Older packs may omit it and receive the engine defaults.
+- `synthesisSections` defines the host's final answer structure.
+
+Native hosts may display named workers. Hosts without custom subagents must use
+separated inline voices and the same host synthesis contract.
 
 ## Character Fields
 
@@ -49,6 +91,11 @@ Optional character field:
 - `leadLines`: unnumbered lines that appear before numbered return sections.
 
 Allowed colors are `red`, `orange`, `yellow`, `green`, `blue`, `purple`, `pink`, and `cyan`.
+
+Every character should state that it is one inner voice and not the final
+decision maker. A pack that appoints its last character as judge is not a valid
+default Innercast execution model, even when that character recommends a
+direction.
 
 ## Installed IDs
 

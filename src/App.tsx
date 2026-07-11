@@ -29,11 +29,9 @@ import {
   confidenceLevels,
   createAction,
   createGap,
-  deriveVerdict,
   generateCouncilNotes,
-  generateHandoffPrompt,
+  generateSessionPrompt,
   generateMarkdown,
-  generateRationale,
   loadCases,
   roleOrder,
   saveCases,
@@ -69,13 +67,6 @@ const roleMeta: Record<CouncilRole, {
     icon: Wrench,
     tone: "success",
     prompts: ["What's the simplest path?", "What are the key milestones?", "What would v1 look like?"],
-  },
-  judge: {
-    title: "Verdict",
-    tag: "Director",
-    icon: Play,
-    tone: "dark",
-    prompts: ["Weigh arguments", "Make a recommendation", "Define success & next steps"],
   },
 };
 
@@ -136,67 +127,67 @@ const landingCopy: Record<Locale, {
   boundary: string;
 }> = {
   en: {
-    nav: ["Personas", "Flow", "Playground"],
-    ctaPrimary: "Try the playground",
-    ctaSecondary: "Download kit",
-    heroTitle: "Give every idea an inner cast before you build.",
+    nav: ["Characters", "Runtime", "Playground"],
+    ctaPrimary: "Preview the cast",
+    ctaSecondary: "Download engine kit",
+    heroTitle: "One AI task. A stable inner cast. A decision that stays yours.",
     heroText:
-      "Innercast turns a vague idea into a named multi-agent review: Doubt breaks it, Spark saves the smallest viable version, Forge scopes the proof, and Verdict decides Kill, Narrow, or Build.",
-    proof: ["Codex agents", "Claude agents", "Prompt handoff"],
-    rolesTitle: "The default cast",
+      "Define named character agents once, then run them inside the AI tool you already use. The cast deliberates from distinct perspectives; the root or main agent weighs the voices and makes the final call.",
+    proof: ["Codex native", "Claude Code native", "Gemini CLI native", "Generic fallback"],
+    rolesTitle: "The cast and its decision owner",
     roles: [
-      { name: "Doubt", role: "Skeptic", text: "Finds the reason not to build." },
-      { name: "Spark", role: "Advocate", text: "Protects the strongest surviving use case." },
-      { name: "Forge", role: "Builder", text: "Cuts the work down to a 7-day proof." },
-      { name: "Verdict", role: "Director", text: "Returns one hard signal." },
+      { name: "Doubt", role: "Skeptic", text: "Challenges assumptions, risks, and the urge to rush." },
+      { name: "Spark", role: "Advocate", text: "Protects the strongest possibility worth pursuing." },
+      { name: "Forge", role: "Builder", text: "Turns the surviving direction into an executable next move." },
+      { name: "Root", role: "Decision owner", text: "Synthesizes the tension, accepts the risk, and makes the final call." },
     ],
-    flowTitle: "Use it where the work already happens.",
-    flow: ["Install the native agent pack.", "Run the cast before implementation.", "Copy the final handoff into your AI builder."],
-    boundaryTitle: "Not another required service",
+    flowTitle: "The same cast, adapted to each runtime.",
+    flow: ["Define or install the cast once.", "Invoke its characters inside the current AI task.", "Let the root or main agent synthesize and continue the work."],
+    boundaryTitle: "An engine, not a separate room",
     boundary:
-      "The default product is agent-native. This page is for discovery, docs, and a lightweight playground, while the real loop stays inside Codex, Claude, and prompt handoffs.",
+      "Innercast uses native named agents where the host supports them and an explicit prompt fallback elsewhere. Host capabilities differ, so fallback mode cannot promise the same UI identity or parallelism as native agents.",
   },
   ko: {
-    nav: ["페르소나", "흐름", "플레이그라운드"],
-    ctaPrimary: "플레이그라운드 열기",
-    ctaSecondary: "키트 다운로드",
-    heroTitle: "빌드하기 전에 모든 아이디어를 내면의 캐스트에 올려보세요.",
+    nav: ["캐릭터", "런타임", "플레이그라운드"],
+    ctaPrimary: "캐스트 미리보기",
+    ctaSecondary: "엔진 키트 다운로드",
+    heroTitle: "하나의 AI 작업, 익숙한 내면 캐스트, 그리고 내가 내리는 결정.",
     heroText:
-      "Innercast는 막연한 아이디어를 이름 붙은 멀티 에이전트 검토로 바꿉니다. Doubt는 부수고, Spark는 살아남을 가능성을 찾고, Forge는 검증 가능한 범위로 줄이며, Verdict는 Kill, Narrow, Build 중 하나로 결론냅니다.",
-    proof: ["Codex 에이전트", "Claude 에이전트", "프롬프트 핸드오프"],
-    rolesTitle: "기본 캐스트",
+      "이름과 성격이 고정된 캐릭터 에이전트를 한 번 정의하고, 이미 사용하는 AI 안에서 실행합니다. 캐스트는 서로 다른 관점으로 숙의하고, 루트 또는 메인 에이전트가 의견을 종합해 최종 결정을 내립니다.",
+    proof: ["Codex 네이티브", "Claude Code 네이티브", "Gemini CLI 네이티브", "범용 폴백"],
+    rolesTitle: "기본 캐스트와 결정 주체",
     roles: [
-      { name: "Doubt", role: "Skeptic", text: "만들지 말아야 할 이유를 찾습니다." },
-      { name: "Spark", role: "Advocate", text: "살아남을 가장 작은 사용 순간을 지킵니다." },
-      { name: "Forge", role: "Builder", text: "작업을 7일짜리 증명으로 줄입니다." },
-      { name: "Verdict", role: "Director", text: "하나의 강한 신호로 결론냅니다." },
+      { name: "Doubt", role: "Skeptic", text: "가정과 위험, 서두르려는 충동을 의심합니다." },
+      { name: "Spark", role: "Advocate", text: "계속 살려볼 가장 강한 가능성을 지킵니다." },
+      { name: "Forge", role: "Builder", text: "살아남은 방향을 실행 가능한 다음 행동으로 만듭니다." },
+      { name: "Root", role: "Decision owner", text: "긴장을 종합하고 감수할 위험을 밝힌 뒤 최종 결정을 내립니다." },
     ],
-    flowTitle: "이미 일하는 곳 안에서 사용합니다.",
-    flow: ["네이티브 에이전트 팩을 설치합니다.", "구현 전에 캐스트를 실행합니다.", "최종 핸드오프를 AI 빌더에 넘깁니다."],
-    boundaryTitle: "또 하나의 필수 서비스가 아닙니다",
+    flowTitle: "같은 캐스트를 각 AI 런타임에 맞게 적용합니다.",
+    flow: ["캐스트를 한 번 정의하거나 설치합니다.", "현재 AI 작업 안에서 캐릭터들을 호출합니다.", "루트 또는 메인 에이전트가 종합하고 작업을 이어갑니다."],
+    boundaryTitle: "별도의 대화방이 아니라 내부 엔진입니다",
     boundary:
-      "기본 제품은 에이전트 네이티브입니다. 이 페이지는 발견, 문서, 가벼운 플레이그라운드를 위한 것이고, 실제 루프는 Codex, Claude, 프롬프트 핸드오프 안에 남습니다.",
+      "호스트가 지원하면 네이티브 이름형 에이전트를 사용하고, 그렇지 않으면 폴백 프롬프트임을 명시합니다. 호스트 기능이 다르므로 폴백은 네이티브와 같은 UI 정체성이나 병렬 실행을 보장하지 않습니다.",
   },
   ja: {
-    nav: ["ペルソナ", "流れ", "プレイグラウンド"],
-    ctaPrimary: "プレイグラウンドを試す",
-    ctaSecondary: "キットをダウンロード",
-    heroTitle: "作る前に、すべてのアイデアを内なるキャストへ。",
+    nav: ["キャラクター", "ランタイム", "プレイグラウンド"],
+    ctaPrimary: "キャストをプレビュー",
+    ctaSecondary: "エンジンキットをダウンロード",
+    heroTitle: "ひとつのAIタスク、馴染みの内なるキャスト、そして自分の決定。",
     heroText:
-      "Innercastは、曖昧なアイデアを名前付きのマルチエージェントレビューに変えます。Doubtが壊し、Sparkが残る可能性を守り、Forgeが検証範囲へ削り、VerdictがKill、Narrow、Buildを決めます。",
-    proof: ["Codex agents", "Claude agents", "Prompt handoff"],
-    rolesTitle: "デフォルトキャスト",
+      "名前と性格を持つキャラクターエージェントを一度定義し、普段使うAIの中で動かします。キャストが異なる視点で議論し、ルートまたはメインエージェントが意見を統合して最終決定します。",
+    proof: ["Codex native", "Claude Code native", "Gemini CLI native", "Generic fallback"],
+    rolesTitle: "デフォルトキャストと決定者",
     roles: [
-      { name: "Doubt", role: "Skeptic", text: "作らない理由を見つけます。" },
-      { name: "Spark", role: "Advocate", text: "残すべき最小の利用場面を守ります。" },
-      { name: "Forge", role: "Builder", text: "7日で試せる証明へ削ります。" },
-      { name: "Verdict", role: "Director", text: "ひとつの強い判断を返します。" },
+      { name: "Doubt", role: "Skeptic", text: "前提、リスク、急ぐ衝動を疑います。" },
+      { name: "Spark", role: "Advocate", text: "追う価値のある最も強い可能性を守ります。" },
+      { name: "Forge", role: "Builder", text: "残った方向を実行可能な次の一手にします。" },
+      { name: "Root", role: "Decision owner", text: "対立を統合し、受け入れるリスクを示して最終決定します。" },
     ],
-    flowTitle: "作業がすでにある場所で使います。",
-    flow: ["ネイティブエージェントパックを入れる。", "実装前にキャストを走らせる。", "最終ハンドオフをAIビルダーへ渡す。"],
-    boundaryTitle: "必須の別サービスではありません",
+    flowTitle: "同じキャストを各AIランタイムへ適応します。",
+    flow: ["キャストを一度定義またはインストールする。", "現在のAIタスク内でキャラクターを呼び出す。", "ルートまたはメインエージェントが統合して作業を続ける。"],
+    boundaryTitle: "別の会話サービスではなく、内部エンジンです",
     boundary:
-      "基本の製品はエージェントネイティブです。このページは発見、ドキュメント、軽いプレイグラウンド用で、実際のループはCodex、Claude、プロンプトハンドオフ内に残ります。",
+      "ホストが対応する場合はネイティブの名前付きエージェントを使い、それ以外ではプロンプトフォールバックであることを明示します。フォールバックはネイティブと同じUI上の人格表示や並列実行を保証しません。",
   },
 };
 
@@ -260,21 +251,17 @@ export function App() {
     setActiveId(fresh.id);
   };
 
-  const runCouncil = () => {
-    const verdict = deriveVerdict(activeCase);
+  const previewCast = () => {
     const councilNotes = generateCouncilNotes(activeCase);
     updateActive((item) => ({
       ...item,
-      verdict,
-      confidence: verdict === "Kill" ? "Low" : "High",
-      rationale: generateRationale(verdict, item),
       councilNotes,
-      handoffPrompt: generateHandoffPrompt(item),
+      sessionPrompt: generateSessionPrompt(item),
     }));
   };
 
   const copyPrompt = async () => {
-    const prompt = activeCase.handoffPrompt || generateHandoffPrompt(activeCase);
+    const prompt = activeCase.sessionPrompt || generateSessionPrompt(activeCase);
     if (await copyText(prompt)) {
       setCopied("prompt");
       setTimeout(() => setCopied(null), 1600);
@@ -322,14 +309,14 @@ export function App() {
           </div>
           <div>
             <h1>Innercast</h1>
-            <p>Give ideas a cast.</p>
+            <p>One task. Many voices.</p>
           </div>
         </div>
 
         <div className="new-case-row">
           <button className="primary-block" onClick={newCase}>
             <Plus size={17} />
-            New idea
+            New decision
           </button>
           <button className="square-button" aria-label="Open template library">
             <Library size={17} />
@@ -339,11 +326,11 @@ export function App() {
         <nav className="sidebar-nav" aria-label="Primary navigation">
           <a className="nav-link" href="#dashboard">
             <LayoutDashboard size={18} />
-            Dashboard
+            Overview
           </a>
           <a className="nav-link active" href="#cases">
             <Folder size={18} />
-            Cases
+            Decisions
           </a>
           <a className="nav-link" href="#templates">
             <FileText size={18} />
@@ -356,7 +343,7 @@ export function App() {
         </nav>
 
         <div className="recent-header">
-          <span>Recent ideas</span>
+          <span>Recent decisions</span>
           <div className="search-mini">
             <Search size={15} />
             <input value={search} onChange={(event) => setSearch(event.target.value)} aria-label="Search cases" />
@@ -385,8 +372,8 @@ export function App() {
               <Check size={16} />
             </span>
             <div>
-              <strong>Local handoff ready</strong>
-              <small>Codex, Claude, Gemini, or generic</small>
+              <strong>Adapter engine ready</strong>
+              <small>Native where supported, fallback elsewhere</small>
             </div>
           </div>
           <div className="profile-card">
@@ -431,7 +418,7 @@ export function App() {
 
         <section className="stage-grid">
           <IntakePanel activeCase={activeCase} setField={setField} />
-          <CouncilPanel activeCase={activeCase} runCouncil={runCouncil} copyPrompt={copyPrompt} copied={copied} />
+          <CouncilPanel activeCase={activeCase} previewCast={previewCast} copyPrompt={copyPrompt} copied={copied} />
           <VerdictPanel
             activeCase={activeCase}
             decisionStats={decisionStats}
@@ -503,7 +490,7 @@ function LandingPage({ locale, setLocale }: { locale: Locale; setLocale: (locale
         <div className="cast-stage" id="personas" aria-label={copy.rolesTitle}>
           <div className="stage-header">
             <span>{copy.rolesTitle}</span>
-            <strong>Kill / Narrow / Build</strong>
+            <strong>Advisory voices → main agent decides</strong>
           </div>
           <div className="persona-grid">
             {copy.roles.map((role) => (
@@ -546,19 +533,19 @@ function IntakePanel({
 }) {
   return (
     <section className="panel intake-panel">
-      <PanelTitle number="1." title="Intake" subtitle="Give the cast something concrete to react to." />
+      <PanelTitle number="1." title="Decision context" subtitle="Give the inner cast one concrete decision to examine." />
       <TextAreaField
-        label="Idea"
+        label="Decision or goal"
         value={activeCase.idea}
         onChange={(value) => setField("idea", value)}
-        placeholder="An AI code review bot that comments on pull requests, suggests improvements, and learns team preferences."
+        placeholder="Should we replace the current review workflow, narrow it, or keep it for another cycle?"
         minRows={5}
       />
       <TextAreaField
-        label="Target user"
+        label="People or system affected"
         value={activeCase.targetUser}
         onChange={(value) => setField("targetUser", value)}
-        placeholder="Indie devs and small teams using GitHub who want faster, higher-quality code reviews."
+        placeholder="The team using the workflow, the repository it affects, and anyone who must maintain the result."
         minRows={4}
       />
       <TextAreaField
@@ -569,10 +556,10 @@ function IntakePanel({
         minRows={4}
       />
       <TextAreaField
-        label="Tempted build"
+        label="Current impulse"
         value={activeCase.temptedBuild}
         onChange={(value) => setField("temptedBuild", value)}
-        placeholder="Full PR analysis, inline comments, risk scoring, auto-fix suggestions, team standards learning, and dashboards."
+        placeholder="What the main agent currently wants to do before hearing the cast."
         minRows={4}
       />
       <label className="field-block">
@@ -580,15 +567,15 @@ function IntakePanel({
         <input
           value={activeCase.tags}
           onChange={(event) => setField("tags", event.target.value)}
-          placeholder="e.g. devtools, ai, productivity"
+          placeholder="e.g. repository, product, workflow"
         />
       </label>
       <label className="field-block">
         <span>Template</span>
         <select value={activeCase.template} onChange={(event) => setField("template", event.target.value)}>
-          <option>Default Cast (Doubt, Spark, Forge, Verdict)</option>
-          <option>Launch Risk Review</option>
-          <option>Pre-Build Scope Review</option>
+          <option>Default Inner Cast (Doubt, Spark, Forge)</option>
+          <option>Product Decision Cast</option>
+          <option>Implementation Decision Cast</option>
         </select>
       </label>
     </section>
@@ -597,24 +584,24 @@ function IntakePanel({
 
 function CouncilPanel({
   activeCase,
-  runCouncil,
+  previewCast,
   copyPrompt,
   copied,
 }: {
   activeCase: CourtCase;
-  runCouncil: () => void;
+  previewCast: () => void;
   copyPrompt: () => void;
   copied: "prompt" | "markdown" | null;
 }) {
-  const generatedPrompt = activeCase.handoffPrompt || generateHandoffPrompt(activeCase);
+  const generatedPrompt = activeCase.sessionPrompt || generateSessionPrompt(activeCase);
 
   return (
     <section className="panel cast-panel">
       <div className="panel-head with-action">
-        <PanelTitle number="2." title="Cast" subtitle="Four instincts. One clearer move." />
-        <button className="run-button" onClick={runCouncil}>
+        <PanelTitle number="2." title="Inner cast" subtitle="Three advisory voices. The main agent owns the call." />
+        <button className="run-button" onClick={previewCast}>
           <Play size={15} />
-          Run Innercast
+          Preview voices
         </button>
       </div>
 
@@ -627,19 +614,19 @@ function CouncilPanel({
       <div className="prompt-box">
         <div className="prompt-head">
           <div>
-            <h3>Agent handoff</h3>
-            <p>Generated from intake + cast context.</p>
+            <h3>Current-task session prompt</h3>
+            <p>This browser is a preview. Native adapters run the live cast inside your AI task.</p>
           </div>
-          <button className="dark-button" onClick={runCouncil}>
+          <button className="dark-button" onClick={previewCast}>
             <Sparkles size={15} />
-            Generate handoff
+            Refresh prompt
           </button>
         </div>
-        <textarea value={generatedPrompt} readOnly aria-label="Generated agent handoff" />
+        <textarea value={generatedPrompt} readOnly aria-label="Generated current-task session prompt" />
         <div className="prompt-actions">
           <button className="ghost-button" onClick={copyPrompt}>
             <Copy size={16} />
-            {copied === "prompt" ? "Copied" : "Copy handoff"}
+            {copied === "prompt" ? "Copied" : "Copy session prompt"}
           </button>
           <a className="ghost-button link-button" href="./innercast-kit.zip" download>
             <Download size={16} />
@@ -674,13 +661,13 @@ function VerdictPanel({
 }) {
   return (
     <section className="panel signal-panel">
-      <PanelTitle number="3." title="Signal & Journal" subtitle="Decide, document, move forward." />
+      <PanelTitle number="3." title="Main decision & journal" subtitle="The root or main agent decides after hearing the cast." />
 
       <div className="section-label">
-        <span>Signal</span>
+        <span>Decision direction</span>
         <CircleHelp size={15} />
       </div>
-      <div className="segmented" role="radiogroup" aria-label="Signal">
+      <div className="segmented" role="radiogroup" aria-label="Decision direction">
         {(Object.keys(verdictTone) as Verdict[]).map((verdict) => (
           <button
             key={verdict}
@@ -690,16 +677,16 @@ function VerdictPanel({
             aria-checked={activeCase.verdict === verdict}
           >
             <span>{verdict === "Build" ? <Check size={20} /> : verdict === "Narrow" ? "−" : "×"}</span>
-            {verdict}
+            {verdictTone[verdict].label}
           </button>
         ))}
       </div>
 
       <TextAreaField
-        label="Rationale"
+        label="Root/main rationale"
         value={activeCase.rationale}
         onChange={(value) => setField("rationale", value)}
-        placeholder="Strong problem fit for target users. Feasible within constraints with a focused v1."
+        placeholder="State which character tensions mattered and why the main agent chose this direction."
         minRows={3}
         compact
       />
@@ -743,7 +730,7 @@ function VerdictPanel({
           <div className={`log-row ${verdict.toLowerCase()}`} key={verdict}>
             <span className="log-dot" />
             <div>
-              <strong>{decisionStats[verdict]} {verdict}</strong>
+              <strong>{decisionStats[verdict]} {verdictTone[verdict].label}</strong>
               <small>{verdictTone[verdict].description}</small>
             </div>
             <VerdictBadge verdict={verdict} />
@@ -881,5 +868,5 @@ function PanelTitle({ number, title, subtitle }: { number: string; title: string
 }
 
 function VerdictBadge({ verdict }: { verdict: Verdict }) {
-  return <span className={`verdict-badge ${verdict.toLowerCase()}`}>{verdict}</span>;
+  return <span className={`verdict-badge ${verdict.toLowerCase()}`}>{verdictTone[verdict].label}</span>;
 }

@@ -4,6 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isMainModule } from "../lib/node-io.mjs";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.dirname(root);
 
@@ -78,9 +80,13 @@ const main = () => {
   process.stdout.write(`Packaged Innercast kit: ${options.out} (${size} bytes)\n`);
 };
 
-try {
-  main();
-} catch (error) {
-  process.stderr.write(`${error.message}\n\n${usage}`);
-  process.exit(1);
+if (isMainModule(import.meta.url)) {
+  try {
+    main();
+  } catch (error) {
+    process.stderr.write(`${error.message}\n\n${usage}`);
+    process.exit(1);
+  }
 }
+
+export { parseArgs, run };

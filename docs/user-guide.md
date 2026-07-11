@@ -1,15 +1,34 @@
 # Innercast User Guide
 
-Innercast is a character roster for multi-agent coding sessions. It makes the subagents in Codex, Claude Code, or Gemini CLI show up as a reusable cast:
+Innercast installs a stable character roster into supported AI runtimes. The
+characters deliberate inside the current user task; the root or main agent
+retains the final decision.
 
-The bundled character names are candidate persona names until explicitly approved. Use `doctor` before treating any pack's names as brand/IP.
+The bundled names are candidates until explicitly approved. Run `doctor` before
+treating any pack's names as final brand or IP.
 
-| Character | Role | Job |
+| Character | Perspective | Advisory job |
 | --- | --- | --- |
-| Doubt | Skeptic | Breaks assumptions and names reasons not to build. |
-| Spark | Advocate | Finds the strongest viable version. |
-| Forge | Builder | Cuts the idea to a 7-day MVP. |
-| Verdict | Director | Returns Kill, Narrow, or Build. |
+| Doubt | Skeptic | Challenges assumptions, risks, and reasons to stop. |
+| Spark | Advocate | Protects the strongest possibility worth pursuing. |
+| Forge | Builder | Produces the smallest executable next move. |
+
+## Mental Model
+
+Think of the current AI task as the decision owner and the characters as its
+recognizable internal voices:
+
+```text
+current user task
+  -> Doubt report
+  -> Spark report
+  -> Forge report
+  -> root/main synthesis and final decision
+```
+
+Hosts may use child threads or isolated worker contexts behind the scenes. The
+user-facing workflow still remains in the current task rather than moving into
+a separate Innercast session.
 
 ## Quick Start
 
@@ -18,19 +37,52 @@ From the `innercast` folder:
 ```bash
 node scripts/validate.mjs
 node scripts/package-kit.mjs
-node scripts/innercast-harness.mjs --json examples/sample-idea.json --format markdown
+node scripts/innercast-engine.mjs \
+  --input examples/sample-decision.json \
+  --platform codex \
+  --format markdown
 ```
 
-If the sample prints `Signal: Kill / Narrow / Build` followed by Doubt, Spark, Forge, and Verdict sections, the local contract is intact.
+Inspect the generated prompt. It should keep each character's work separate and
+reserve the final decision for the root or main agent.
 
-Install only after the local smoke run:
+Preview installation before writing host configuration:
 
 ```bash
 node scripts/install-adapters.mjs --all --dry-run
 node scripts/install-adapters.mjs --all
 ```
 
-If any target file already exists with different content, the installer stops. Re-run with `--force` only when overwriting is intentional.
+If a target file already exists with different content, the installer stops.
+Use `--force` only when replacing that file is intentional.
+
+## Embed the Core
+
+`innercast/index.mjs` is a pure JavaScript entry point for an app or future
+executor. The caller supplies the roster object; the core does not read files,
+call a provider, or require Node APIs.
+
+```js
+import {
+  compileCastPlan,
+  createDefaultHostRegistry,
+  evaluateExecutionBudget,
+} from "./index.mjs";
+
+const plan = compileCastPlan({
+  decision: "Should we continue?",
+  context: "Known evidence",
+  castDefinition: roster,
+  platform: "claude",
+  hostRegistry: createDefaultHostRegistry(),
+});
+
+const budget = evaluateExecutionBudget(plan);
+```
+
+This is compilation, not execution. A runtime adapter must still dispatch the
+character prompts, collect their outputs, apply timeouts or partial-failure
+policy, and run root synthesis.
 
 Undo a matching install:
 
@@ -39,138 +91,145 @@ node scripts/install-adapters.mjs --all --uninstall --dry-run
 node scripts/install-adapters.mjs --all --uninstall
 ```
 
-## Share Character Packs
+## Run in Codex
 
-Innercast packs are folders that can be shared through GitHub, zip files, or a private folder:
-
-```text
-packs/my-pack/innercast-pack.json
-```
-
-Create a starter pack:
-
-```bash
-node scripts/innercast-pack.mjs init my-pack --name "My Pack" --out /tmp/my-pack
-node scripts/innercast-pack.mjs validate /tmp/my-pack
-```
-
-List and inspect bundled packs:
-
-```bash
-node scripts/innercast-pack.mjs list
-node scripts/innercast-pack.mjs preview innercast-default
-node scripts/innercast-pack.mjs preview noir-review
-```
-
-Validate and export a pack:
-
-```bash
-node scripts/innercast-pack.mjs validate innercast-default
-node scripts/innercast-pack.mjs doctor innercast-default
-node scripts/innercast-pack.mjs export innercast-default --out /tmp/innercast-default
-```
-
-Compare two packs before updating:
-
-```bash
-node scripts/innercast-pack.mjs diff innercast-default noir-review
-```
-
-Install a pack only after checking the dry-run output:
-
-```bash
-node scripts/innercast-pack.mjs install innercast-default --all --dry-run
-node scripts/innercast-pack.mjs install innercast-default --all
-```
-
-Shared packs install namespaced agent ids such as `innercast-default-doubt`, while the visible nickname remains `Doubt`. That prevents a downloaded character pack from overwriting the default adapters.
-If `doctor` reports `namingStatus: candidate`, the names are not final.
-
-## Install Only One Surface
-
-Codex agents:
+Install the Codex adapters:
 
 ```bash
 node scripts/install-adapters.mjs --codex
 ```
 
-Claude Code agents:
+Then ask inside the task that owns the decision:
+
+```text
+Run Innercast on this decision. Invoke Doubt, Spark, and Forge as
+separate advisory subagents in this task. Keep their reports independent.
+After they return, the main agent must compare the disagreements and make the
+final decision; do not delegate final authority to any character.
+```
+
+Codex adapters are generated in `adapters/codex/agents/*.toml`. Their
+`nickname_candidates` values request stable visible names, but host UI behavior
+remains controlled by Codex.
+
+## Run in Claude Code
+
+Install the Claude Code adapters:
 
 ```bash
 node scripts/install-adapters.mjs --claude
 ```
 
-Gemini CLI agents:
+Use this inside the current Claude Code task:
+
+```text
+Use the installed Doubt, Spark, and Forge agents as independent
+advisers on this decision. Gather all reports, surface their disagreements, and
+then make the final call in the main conversation.
+```
+
+Claude Code adapters are generated in `adapters/claude/agents/*.md`.
+
+## Run in Gemini CLI
+
+Install the Gemini CLI adapters:
 
 ```bash
 node scripts/install-adapters.mjs --gemini
 ```
 
-Codex skill:
+Use this inside the current Gemini CLI task:
+
+```text
+Run the installed Innercast characters on this decision. Keep each character's
+report distinct, then have the main agent synthesize and decide.
+```
+
+Gemini CLI adapters are generated in `adapters/gemini/agents/*.md`. The current
+adapter target invokes each one through `invoke_agent` with its `agent_name`
+and character prompt. Visible-name behavior may still depend on the installed
+Gemini CLI version.
+
+## Generic Prompt Fallback
+
+For a host without native custom agents:
 
 ```bash
-node scripts/install-adapters.mjs --skill
+node scripts/innercast-engine.mjs \
+  --platform generic \
+  --decision "..." \
+  --context "..." \
+  --constraints "..." \
+  --stakes "..." \
+  --format prompt
 ```
 
-## Use In Codex
+Generic mode preserves separated character contracts in one prompt. It cannot
+guarantee native subagents, parallel execution, isolated contexts, or visible
+character names. The generated output should identify itself as prompt fallback
+rather than implying native-agent execution.
+
+## Expected Decision Shape
 
 ```text
-Run Innercast. Spawn Doubt, Spark, Forge, and Verdict as separate subagents if available, then have Verdict return the final Kill/Narrow/Build signal.
+Decision: <one clear choice>
+Confidence: Low / Medium / High
+
+1. Character Positions
+2. Main Tension
+3. Decision Rationale
+4. Risks Accepted
+5. Next Action
 ```
 
-Codex uses the generated files in `adapters/codex/agents/*.toml`. Each file sets `nickname_candidates` to the character's display name.
+Other packs may define a different decision protocol while preserving character
+separation and root/main ownership.
 
-## Use In Claude Code
+## Share Character Packs
+
+Packs can live in a repository, zip archive, or local folder:
 
 ```text
-Use the doubt, spark, forge, and verdict agents to run Innercast on this idea. Keep their findings separate, then have Verdict return Kill/Narrow/Build.
+packs/my-pack/innercast-pack.json
 ```
 
-Claude Code uses the generated files in `adapters/claude/agents/*.md`.
-
-## Use In Gemini CLI
-
-```text
-Run Innercast. If the agents are installed, invoke @doubt, @spark, @forge, and @verdict separately. Keep the first three findings separate, then ask @verdict for Kill/Narrow/Build.
-```
-
-Gemini CLI uses the generated files in `adapters/gemini/agents/*.md`.
-
-## Generic Prompt Handoff
-
-For an AI app without native custom subagents:
+Create and validate a starter pack:
 
 ```bash
-node scripts/innercast-harness.mjs \
-  --adapter generic \
-  --idea "..." \
-  --target-user "..." \
-  --constraints "..."
+node scripts/innercast-pack.mjs init my-pack --name "My Pack" --out /tmp/my-pack
+node scripts/innercast-pack.mjs validate /tmp/my-pack
+node scripts/innercast-pack.mjs doctor /tmp/my-pack
 ```
 
-Generic mode preserves the cast behavior, but cannot force the host app's UI to show the character names.
-
-Run a handoff with a shared character pack:
+List, preview, and compare bundled packs:
 
 ```bash
-node scripts/innercast-harness.mjs \
-  --pack noir-review \
-  --adapter codex \
-  --idea "..." \
-  --format markdown
+node scripts/innercast-pack.mjs list
+node scripts/innercast-pack.mjs preview innercast-default
+node scripts/innercast-pack.mjs diff innercast-default noir-review
 ```
 
-When `--pack` is used, the handoff includes the pack's character contracts and namespaced agent ids such as `noir-review-suspicion`.
+Export or install only after reviewing the pack:
 
-## Output Shape
-
-```text
-Signal: Kill / Narrow / Build
-
-1. Doubt Objections
-2. Spark Survival Case
-3. Forge 7-Day MVP
-4. Evidence Gaps
-5. Verdict Decision
-6. Next 3 Actions
+```bash
+node scripts/innercast-pack.mjs export innercast-default --out /tmp/innercast-default
+node scripts/innercast-pack.mjs install innercast-default --all --dry-run
+node scripts/innercast-pack.mjs install innercast-default --all
 ```
+
+Shared packs use namespaced agent ids such as
+`innercast-default-doubt`, while the requested visible nickname can remain
+`Doubt`. Namespacing prevents a downloaded pack from silently overwriting the
+default adapter.
+
+## Fidelity Levels
+
+Before claiming support for a new AI host, classify the adapter honestly:
+
+1. **Native:** separate character agents are supported by the host.
+2. **Orchestrated:** independent agent calls are possible, but character names
+   may not appear in the host UI.
+3. **Fallback:** one prompt renders separated voices without native agents.
+
+“Works with every AI” should mean that a disclosed fallback can preserve the
+ritual. It must not mean identical agent behavior on every host.

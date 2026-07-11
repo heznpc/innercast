@@ -3,126 +3,84 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { renderAgentFiles } from "../lib/host-adapters.mjs";
+import { isMainModule } from "../lib/node-io.mjs";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rosterPath = path.join(root, "roster", "innercast.roles.json");
-const codexDir = path.join(root, "adapters", "codex", "agents");
-const claudeDir = path.join(root, "adapters", "claude", "agents");
-const geminiDir = path.join(root, "adapters", "gemini", "agents");
+const hostDirectories = Object.freeze({
+  codex: path.join(root, "adapters", "codex", "agents"),
+  claude: path.join(root, "adapters", "claude", "agents"),
+  gemini: path.join(root, "adapters", "gemini", "agents"),
+});
 
-const roster = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
-const checkOnly = process.argv.includes("--check");
+const readRoster = () => JSON.parse(fs.readFileSync(rosterPath, "utf8"));
 
-const quoteToml = (value) => JSON.stringify(value);
-
-const renderInstructions = (character) => {
-  const focus = character.focus.map((item) => `- ${item}`).join("\n");
-  const rules = character.rules.map((item) => `- ${item}`).join("\n");
-  const leadLines = (character.leadLines || []).join("\n");
-  const sections = character.returnSections
-    .map((item, index) => `${index + 1}. ${item}`)
-    .join("\n");
-  const returnBlock = [leadLines, sections].filter(Boolean).join("\n\n");
-  const namingNotice = roster.namingStatus && roster.namingStatus !== "approved"
-    ? `\nNaming status: ${roster.namingStatus}. ${roster.namingNote || "Do not treat this character name as final brand/IP."}\n`
-    : "";
-
-  return `You are ${character.displayName}, the ${character.archetype} in an Innercast run.
-${namingNotice}
-
-${character.oneLine}
-
-Focus on:
-${focus}
-
-Rules:
-${rules}
-
-Return:
-${returnBlock}`;
+const buildExpectedAdapterFiles = (roster = readRoster()) => {
+  return renderAgentFiles(roster, { hosts: Object.keys(hostDirectories) }).map((file) => ({
+    ...file,
+    path: path.join(hostDirectories[file.surface], file.name),
+  }));
 };
 
-const renderCodex = (character) => `name = ${quoteToml(character.id)}
-description = ${quoteToml(character.description)}
-sandbox_mode = "read-only"
-model_reasoning_effort = "high"
-nickname_candidates = [${quoteToml(character.displayName)}]
+const findMismatches = (files) => files.filter((file) => {
+  return !fs.existsSync(file.path) || fs.readFileSync(file.path, "utf8") !== file.content;
+});
 
-developer_instructions = """
-${renderInstructions(character)}
-"""
-`;
-
-const renderClaude = (character) => `---
-name: ${character.id}
-description: ${character.description}
-tools: Read, Glob, Grep
-model: inherit
-color: ${character.color}
----
-
-${renderInstructions(character)}
-`;
-
-const renderGemini = (character) => `---
-name: ${character.id}
-description: ${character.description}
-kind: local
-tools:
-  - read_file
-  - grep_search
-model: inherit
-temperature: 0.2
-max_turns: 8
----
-
-${renderInstructions(character)}
-`;
-
-const expectedFiles = () => {
-  const files = [];
-  for (const character of roster.characters) {
-    files.push({
-      path: path.join(codexDir, `${character.id}.toml`),
-      content: renderCodex(character),
-    });
-    files.push({
-      path: path.join(claudeDir, `${character.id}.md`),
-      content: renderClaude(character),
-    });
-    files.push({
-      path: path.join(geminiDir, `${character.id}.md`),
-      content: renderGemini(character),
-    });
+const staleGeneratedFiles = (files) => {
+  const expectedBySurface = Object.fromEntries(Object.keys(hostDirectories).map((surface) => [
+    surface,
+    new Set(files.filter((file) => file.surface === surface).map((file) => file.name)),
+  ]));
+  const stale = [];
+  for (const [surface, directory] of Object.entries(hostDirectories)) {
+    if (!fs.existsSync(directory)) continue;
+    const generatedExtension = surface === "codex" ? ".toml" : ".md";
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(generatedExtension) && !expectedBySurface[surface].has(entry.name)) {
+        stale.push(path.join(directory, entry.name));
+      }
+    }
   }
-  return files;
+  return stale;
 };
 
-if (checkOnly) {
-  const mismatches = expectedFiles().filter((file) => {
-    return !fs.existsSync(file.path) || fs.readFileSync(file.path, "utf8") !== file.content;
-  });
-
-  if (mismatches.length) {
-    process.stderr.write(
-      `Adapter output is stale or missing:\n${mismatches.map((file) => `- ${path.relative(root, file.path)}`).join("\n")}\n`,
-    );
-    process.exit(1);
+const synchronizeAdapters = (files) => {
+  for (const directory of Object.values(hostDirectories)) {
+    fs.mkdirSync(directory, { recursive: true });
   }
-  process.stdout.write("Adapter output is current.\n");
-  process.exit(0);
-}
+  for (const stale of staleGeneratedFiles(files)) fs.rmSync(stale);
+  for (const file of files) {
+    if (!fs.existsSync(file.path) || fs.readFileSync(file.path, "utf8") !== file.content) {
+      fs.writeFileSync(file.path, file.content);
+    }
+  }
+};
 
-fs.rmSync(codexDir, { recursive: true, force: true });
-fs.rmSync(claudeDir, { recursive: true, force: true });
-fs.rmSync(geminiDir, { recursive: true, force: true });
-fs.mkdirSync(codexDir, { recursive: true });
-fs.mkdirSync(claudeDir, { recursive: true });
-fs.mkdirSync(geminiDir, { recursive: true });
+const main = () => {
+  const checkOnly = process.argv.includes("--check");
+  const roster = readRoster();
+  const files = buildExpectedAdapterFiles(roster);
+  const mismatches = [...findMismatches(files), ...staleGeneratedFiles(files).map((file) => ({ path: file }))];
 
-for (const file of expectedFiles()) {
-  fs.writeFileSync(file.path, file.content);
-}
+  if (checkOnly) {
+    if (mismatches.length) {
+      process.stderr.write(
+        `Adapter output is stale or missing:\n${mismatches.map((file) => `- ${path.relative(root, file.path)}`).join("\n")}\n`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+    process.stdout.write("Adapter output is current.\n");
+    return;
+  }
 
-process.stdout.write(
-  `Generated ${roster.characters.length} Codex agents, ${roster.characters.length} Claude agents, and ${roster.characters.length} Gemini agents.\n`,
-);
+  synchronizeAdapters(files);
+  process.stdout.write(
+    `Generated ${roster.characters.length} Codex agents, ${roster.characters.length} Claude agents, and ${roster.characters.length} Gemini agents.\n`,
+  );
+};
+
+if (isMainModule(import.meta.url)) main();
+
+export { buildExpectedAdapterFiles, findMismatches, synchronizeAdapters };
