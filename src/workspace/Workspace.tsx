@@ -68,11 +68,11 @@ export function Workspace() {
   };
 
   const previewCast = () => {
-    const councilNotes = generateCouncilNotes(activeCase);
     const refreshed = resolveSessionPrompt({ ...activeCase, sessionPrompt: "" });
+    const councilNotes = refreshed.error === null ? generateCouncilNotes(activeCase) : null;
     updateActive((item) => ({
       ...item,
-      councilNotes,
+      councilNotes: councilNotes ?? item.councilNotes,
       sessionPrompt: refreshed.prompt,
       sessionPromptSource: "core-v1",
     }));
