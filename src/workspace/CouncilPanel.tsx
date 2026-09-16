@@ -1,5 +1,6 @@
 import { ChevronRight, CircleHelp, Copy, Download, Play, Shield, Sparkles, Wrench } from "lucide-react";
-import { generateSessionPrompt, roleOrder } from "../court";
+import { roleOrder } from "../court";
+import type { SessionPromptResult } from "../session-prompt.mjs";
 import type { CouncilRole, CourtCase } from "../types";
 import { PanelTitle } from "./panel-ui";
 
@@ -35,17 +36,17 @@ const roleMeta: Record<CouncilRole, {
 
 export function CouncilPanel({
   activeCase,
+  sessionPrompt,
   previewCast,
   copyPrompt,
   copied,
 }: {
   activeCase: CourtCase;
+  sessionPrompt: SessionPromptResult;
   previewCast: () => void;
   copyPrompt: () => void;
   copied: "prompt" | "markdown" | null;
 }) {
-  const generatedPrompt = activeCase.sessionPrompt || generateSessionPrompt(activeCase);
-
   return (
     <section className="panel cast-panel">
       <div className="panel-head with-action">
@@ -73,9 +74,12 @@ export function CouncilPanel({
             Refresh prompt
           </button>
         </div>
-        <textarea value={generatedPrompt} readOnly aria-label="Generated current-task session prompt" />
+        {sessionPrompt.error !== null && (
+          <p role="alert">Unable to generate prompt: {sessionPrompt.error} Edit the decision context and refresh the prompt.</p>
+        )}
+        <textarea value={sessionPrompt.prompt} readOnly aria-label="Generated current-task session prompt" />
         <div className="prompt-actions">
-          <button className="ghost-button" onClick={copyPrompt}>
+          <button className="ghost-button" onClick={copyPrompt} disabled={sessionPrompt.error !== null}>
             <Copy size={16} />
             {copied === "prompt" ? "Copied" : "Copy session prompt"}
           </button>

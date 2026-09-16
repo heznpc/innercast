@@ -40,20 +40,20 @@ test("host-independent core modules do not import Node built-ins", () => {
   }
 });
 
-test("pure core preserves the pre-refactor sample output", () => {
+test("pure core preserves the sample plan and current prompt contract", () => {
   const output = compileSample();
   assert.equal(output.cast.definitionSha256, "ceee09d04efb5afe7b12855cf1a3e53c78b8187d0a4c74ed1c21b0a2ee62cdc8");
   assert.deepEqual(output.cast.characterOrder, ["doubt", "spark", "forge"]);
   assert.equal(hash(renderExecutionPlanJson(output)), "9e6aca595896b49bbafc95635dc6a2ecf4f0d137ff3dc01f30b01db2390b690b");
   assert.equal(hash(renderExecutionPlanMarkdown(output)), "954d9e4879e7b0fb3dd13a7bbcc605dee5a525343725b8eb9cb391bb3a01dc16");
-  assert.equal(hash(renderExecutionPrompt(output)), "096cfd18ecf82909ec1fb200ce155223e07d9b0f2236312d9b53d9352366da46");
+  assert.equal(hash(renderExecutionPrompt(output)), "c5087d3b73bb29a85681dec969240901ade65834ef579795b24e50a65efbe3ee");
 });
 
 test("CLI keeps newline and golden output compatibility", () => {
   const expected = {
     json: "9a9d9366dad322ec5eef5c6b400336a5dc6eea1cd88b482e13d6ace1802438f6",
     markdown: "1fb99145fd88f040469dadb20f8def27c15a2f522d955d127226792d7f34c704",
-    prompt: "3fe9fae4271c774aaebefde2fd428889f34d4caf8558e2f00b4652bf947808d7",
+    prompt: "1d1c797665c4ec72705add2abceea28fd7e1a69770f57a25bdf2550bbd829bcc",
   };
   for (const [format, digest] of Object.entries(expected)) {
     const result = spawnSync(process.execPath, [

@@ -1,7 +1,7 @@
 import { Download, MoreHorizontal, Save, Share2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  blankCase, createAction, createGap, generateCouncilNotes, generateSessionPrompt,
+  blankCase, createAction, createGap, generateCouncilNotes, resolveSessionPrompt,
   generateMarkdown, loadCases, saveCases, titleFromIdea,
 } from "../court";
 import type { ActionItem, CourtCase, EvidenceGap, Verdict } from "../types";
@@ -18,6 +18,7 @@ export function Workspace() {
   const [search, setSearch] = useState("");
 
   const activeCase = cases.find((item) => item.id === activeId) ?? cases[0];
+  const sessionPrompt = useMemo(() => resolveSessionPrompt(activeCase), [activeCase]);
 
   useEffect(() => {
     saveCases(cases);
@@ -68,22 +69,25 @@ export function Workspace() {
 
   const previewCast = () => {
     const councilNotes = generateCouncilNotes(activeCase);
+    const refreshed = resolveSessionPrompt({ ...activeCase, sessionPrompt: "" });
     updateActive((item) => ({
       ...item,
       councilNotes,
-      sessionPrompt: generateSessionPrompt(item),
+      sessionPrompt: refreshed.prompt,
+      sessionPromptSource: "core-v1",
     }));
   };
 
   const copyPrompt = async () => {
-    const prompt = activeCase.sessionPrompt || generateSessionPrompt(activeCase);
-    if (await copyText(prompt)) {
+    if (sessionPrompt.error !== null) return;
+    if (await copyText(sessionPrompt.prompt)) {
       setCopied("prompt");
       setTimeout(() => setCopied(null), 1600);
     }
   };
 
   const copyMarkdown = async () => {
+    if (sessionPrompt.error !== null) return;
     if (await copyText(generateMarkdown(activeCase))) {
       setCopied("markdown");
       setTimeout(() => setCopied(null), 1600);
@@ -91,6 +95,7 @@ export function Workspace() {
   };
 
   const exportMarkdown = () => {
+    if (sessionPrompt.error !== null) return;
     const safeTitle = activeCase.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "innercast";
     downloadText(`${safeTitle}-signal.md`, generateMarkdown(activeCase));
   };
@@ -140,11 +145,11 @@ export function Workspace() {
               <Save size={17} />
               Save draft
             </button>
-            <button className="ghost-button" onClick={copyMarkdown}>
+            <button className="ghost-button" onClick={copyMarkdown} disabled={sessionPrompt.error !== null}>
               <Share2 size={17} />
               {copied === "markdown" ? "Copied" : "Share"}
             </button>
-            <button className="ghost-button" onClick={exportMarkdown}>
+            <button className="ghost-button" onClick={exportMarkdown} disabled={sessionPrompt.error !== null}>
               <Download size={17} />
               Export
             </button>
@@ -156,7 +161,7 @@ export function Workspace() {
 
         <section className="stage-grid">
           <IntakePanel activeCase={activeCase} setField={setField} />
-          <CouncilPanel activeCase={activeCase} previewCast={previewCast} copyPrompt={copyPrompt} copied={copied} />
+          <CouncilPanel activeCase={activeCase} sessionPrompt={sessionPrompt} previewCast={previewCast} copyPrompt={copyPrompt} copied={copied} />
           <VerdictPanel
             activeCase={activeCase}
             decisionStats={decisionStats}

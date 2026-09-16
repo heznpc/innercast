@@ -1,5 +1,8 @@
 import type { ActionItem, Confidence, CouncilRole, CourtCase, EvidenceGap, Verdict } from "./types";
 
+import { generateSessionPrompt, resolveSessionPrompt } from "./session-prompt.mjs";
+export { generateSessionPrompt, resolveSessionPrompt } from "./session-prompt.mjs";
+
 const STORAGE_KEY = "innercast:cases:v3";
 
 const nowIso = () => new Date().toISOString();
@@ -92,7 +95,7 @@ export const seedCases = (): CourtCase[] => {
     createdAt: "2026-06-23T08:30:00.000Z",
     updatedAt: nowIso(),
   };
-  return [{ ...seed, sessionPrompt: generateSessionPrompt(seed) }];
+  return [{ ...seed, sessionPrompt: generateSessionPrompt(seed), sessionPromptSource: "core-v1" }];
 };
 
 type StoredCouncilNotes = Partial<Record<CouncilRole | "judge" | "integrator", string[]>>;
@@ -125,10 +128,11 @@ const normalizeCase = (item: StoredCase): CourtCase => {
     sessionPrompt: "",
   };
   const storedPrompt = item.sessionPrompt || item.handoffPrompt || item.codexPrompt || "";
-  const canReusePrompt = storedPrompt && !/\bVerdict\b|handoff/i.test(storedPrompt);
+  const canReusePrompt = storedPrompt && (item.sessionPromptSource === "core-v1" || !/\bVerdict\b|handoff/i.test(storedPrompt));
   return {
     ...normalized,
-    sessionPrompt: canReusePrompt ? storedPrompt : generateSessionPrompt(normalized),
+    sessionPrompt: canReusePrompt ? storedPrompt : resolveSessionPrompt(normalized).prompt,
+    sessionPromptSource: canReusePrompt ? item.sessionPromptSource : "core-v1",
   };
 };
 
@@ -178,48 +182,11 @@ export const generateCouncilNotes = (courtCase: Pick<CourtCase, "idea" | "target
   };
 };
 
-export const generateSessionPrompt = (courtCase: CourtCase) => {
-  return `Run Innercast inside this current AI task.
-
-Treat the root or main agent for this task as the decision owner. Use three advisory characters:
-- Doubt: challenge assumptions, risks, and reasons to stop
-- Spark: protect the strongest possibility and value
-- Forge: convert the surviving direction into an executable next move
-
-If native custom agents named Doubt, Spark, and Forge are available, spawn one subagent per character within this task and wait for all of them. Keep their findings independent until every character has reported. Do not create a separate user-facing decision session.
-
-If native character agents are unavailable, run in prompt fallback mode: simulate the three voices in clearly separated sections and disclose that no native subagents were used. Do not claim the fallback is equivalent to native parallel agents.
-
-After the cast reports, the root or main agent must compare their disagreements and make the final decision. No character may decide on behalf of the root or main agent.
-
-The root or main agent must return exactly this structure:
-
-Decision: <one clear choice>
-Confidence: Low / Medium / High
-
-1. Character Positions
-2. Main Tension
-3. Decision Rationale
-4. Risks Accepted
-5. Next Action
-
-Decision or goal:
-${courtCase.idea || "<what needs to be decided>"}
-
-People or system affected:
-${courtCase.targetUser || "<who or what is affected>"}
-
-Current context:
-${courtCase.tags || "<repo/product/workflow/resources>"}
-
-Constraints:
-${courtCase.constraints || "<time, budget, technical, distribution, trust, or personal constraints>"}
-
-Current impulse:
-${courtCase.temptedBuild || "<what the main agent currently wants to do>"}`;
-};
-
 export const generateMarkdown = (courtCase: CourtCase) => {
+  const prompt = courtCase.sessionPrompt || generateSessionPrompt(courtCase);
+  let fenceLength = 3;
+  for (const match of prompt.matchAll(/`+/g)) fenceLength = Math.max(fenceLength, match[0].length + 1);
+  const promptFence = "`".repeat(fenceLength);
   const gaps = courtCase.evidenceGaps
     .map((gap) => `- [${gap.resolved ? "x" : " "}] ${gap.text}`)
     .join("\n");
@@ -274,9 +241,9 @@ ${actions}
 
 ## Current-Task Session Prompt
 
-\`\`\`text
-${courtCase.sessionPrompt || generateSessionPrompt(courtCase)}
-\`\`\`
+${promptFence}text
+${prompt}
+${promptFence}
 `;
 };
 

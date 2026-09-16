@@ -31,6 +31,7 @@ export interface CourtCase {
   nextActions: ActionItem[];
   councilNotes: Record<CouncilRole, string[]>;
   sessionPrompt: string;
+  sessionPromptSource?: "core-v1";
   createdAt: string;
   updatedAt: string;
 }

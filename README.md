@@ -69,7 +69,10 @@ innercast/scripts/          Node CLI, generator, installer, pack tools, and vali
 innercast/adapters/         Generated host-native agent definitions
 docs/user-guide.md          Installation and runtime usage
 docs/surface-map.md         Product boundary and support tiers
-src/                        Multilingual landing page and browser preview
+src/landing/                Landing page and multilingual copy
+src/workspace/              Case state, sidebar, cast preview, and decision journal
+src/session-prompt.mjs      Browser input mapping into the shared compiler and renderer
+src/utils/                  Browser clipboard and download helpers
 public/innercast-kit.zip    Downloadable kit artifact for the Pages site
 .github/workflows/          GitHub Pages deployment and validation workflow
 ```
@@ -103,6 +106,14 @@ Open `http://127.0.0.1:5176/`.
 
 The browser app previews the cast contract and creates a current-task session
 prompt. It does not claim to run live native subagents in the browser.
+
+The session prompt uses the canonical roster, compiler, budget checks, and
+execution-prompt renderer used by the CLI. It includes all host targets; the
+receiving host chooses its available native adapter or discloses fallback mode.
+The short voice cards remain illustrative local preview notes, not model output.
+Saved prompts stay snapshots until **Refresh prompt** is selected. If prompt
+generation fails validation or exceeds the budget, the draft remains editable
+with prompt copying and export disabled until a valid prompt can be generated.
 
 Compile a host-specific execution plan without calling a model:
 
