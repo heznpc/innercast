@@ -27,6 +27,16 @@ harness; `innercast/scripts/innercast-harness.mjs` is an older prompt CLI.
   Treat historical reports as leads, not proof. Do not ask the user to repeat
   the premise already recorded here.
 
+## First prototype and evidence
+
+The requested prototype is an **automatic dogeza pet that is also callable as
+the same subagent**. Its name and appearance are undecided; do not substitute
+Forge or a work robot. Read `docs/dogeza-pet-feasibility.md` before designing it.
+Keep reaction costs explicit. Prefer a path without additional model inference
+for ambient reactions; no paid detection budget or exact algorithm is approved.
+Existing harness/compiler/web tests do not establish detector or pet behavior.
+An invented reaction-tool signature is not evidence of host animation control.
+
 ## Work and handoff
 
 1. Keep the requested surface explicit. For pet work use `native-pet`.

@@ -1,38 +1,57 @@
 {
   "version": 1,
   "intent": {
-    "source": "User clarification and request for a repository harness, 2026-09-17; summarized here, not a verbatim quotation.",
+    "source": "User requests and corrections through 2026-09-18; summarized, not quoted. See docs/dogeza-pet-feasibility.md for the evidence and proposal distinctions.",
     "character": "native-pet",
-    "definition": "Innercast characters are custom pets added to the host's built-in Pets surface, with appearance and behavior that respond to the user and session.",
+    "definition": "Innercast characters are custom pets in the host built-in Pets surface and can also appear as the same named subagent. The first requested prototype automatically performs dogeza on user frustration signals; its name and appearance are undecided.",
     "journey": [
-      "Create or customize a character in Innercast.",
-      "Add it to the host's built-in pet list.",
-      "Observe its reactions inside that host."
+      "Create a dogeza character; do not silently substitute Forge or a work robot.",
+      "Install and observe it in the host built-in pet list.",
+      "Connect frustration signals to automatic dogeza, without requiring a button or pinching.",
+      "Invoke the same character as a named subagent and receive its result."
     ],
     "constraints": [
       "An agent role or browser demo is not a substitute for the requested native pet.",
       "An automatic reaction to frustration is distinct from a manually triggered pose.",
       "Pinching is a separate interaction, not the cause required for the automatic reaction.",
-      "Pet reactions should not recreate the apology-message loop that consumes model tokens."
+      "Pet reactions should not recreate the apology-message loop that consumes model tokens.",
+      "The first character must perform automatic dogeza; its name and appearance have not been chosen by the user.",
+      "The same pet character must be usable as a subagent. A shared name alone does not prove shared state or a working connection.",
+      "Disclose detection costs before selecting the implementation. No runtime token or cost measurement has been performed.",
+      "Existing harness, compiler, and web tests are not native-pet or frustration-detector tests.",
+      "Read docs/dogeza-pet-feasibility.md for requirements, verified sources, missing tests, and retracted proposals."
     ]
   },
   "harnessDefaults": {
     "source": "Implementation choices for this harness, not additional user requirements.",
-    "surfaces": ["native-pet", "agent-adapter", "web-preview", "core", "repository-harness"],
-    "completion": "Record the actual target surface and runtime observation; tests alone do not establish native-pet integration."
+    "surfaces": [
+      "native-pet",
+      "agent-adapter",
+      "web-preview",
+      "core",
+      "repository-harness"
+    ],
+    "completion": "Record the actual target surface and runtime observation; tests alone do not establish native-pet integration.",
+    "reactionCost": "Prefer no additional model inference for ambient reactions, based on the original token-waste concern. The user has not approved a detailed detection algorithm or a paid inference budget."
   },
   "capabilities": [
     {
       "id": "advisory-agent-kit",
       "status": "implemented",
       "description": "Existing compiler and generated agent configurations; this is supporting code, not a pet installer.",
-      "evidence": ["innercast/scripts/install-adapters.mjs", "innercast/lib/compiler.mjs"]
+      "evidence": [
+        "innercast/scripts/install-adapters.mjs",
+        "innercast/lib/compiler.mjs"
+      ]
     },
     {
       "id": "browser-preview",
       "status": "implemented",
       "description": "Existing website and prompt preview; not native-pet execution.",
-      "evidence": ["src/App.tsx", "src/session-prompt.mjs"]
+      "evidence": [
+        "src/App.tsx",
+        "src/session-prompt.mjs"
+      ]
     },
     {
       "id": "native-pet-installation",
@@ -43,8 +62,26 @@
     {
       "id": "session-reaction-bridge",
       "status": "unverified",
-      "description": "Reading session signals and selecting native-pet reactions requires host capability verification. Prior conversation reports are not execution evidence.",
-      "evidence": []
+      "description": "A prompt hook is documented, but not tested in this app session. A supported external native-pet animation-control path has not been found. No end-to-end dogeza execution exists.",
+      "evidence": [
+        "docs/dogeza-pet-feasibility.md"
+      ]
+    },
+    {
+      "id": "frustration-detector",
+      "status": "unverified",
+      "description": "No detector implementation or false-positive, false-negative, or cost measurements exist. Main-model classification was a proposal, not a verified free path.",
+      "evidence": [
+        "docs/dogeza-pet-feasibility.md"
+      ]
+    },
+    {
+      "id": "pet-subagent-identity",
+      "status": "unverified",
+      "description": "Custom agent configuration is supported, but no dogeza pet package linked to the same callable character has been created or executed.",
+      "evidence": [
+        "docs/dogeza-pet-feasibility.md"
+      ]
     }
   ]
 }
