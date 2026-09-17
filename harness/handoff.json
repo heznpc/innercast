@@ -1,25 +1,25 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-17",
-  "task": "Persist the native-pet product premise across development tasks.",
+  "updatedAt": "2026-09-18",
+  "task": "Apply the repository harness to the existing character-work checkout.",
   "requestedSurface": "repository-harness",
   "deliveredSurface": "repository-harness",
   "status": "complete",
-  "summary": "Repository entry points load native-pet intent, capability status, and task handoff. CLI and CI validate scope and completion evidence; no native-pet integration is claimed.",
+  "summary": "The existing character-work checkout now includes commit 648676f and its prerequisite history on feat/native-pet-harness. Its original innercast/ working directory runs the harness and loads the native-pet premise.",
   "runs": [
     {
       "surface": "repository-harness",
       "kind": "runtime",
-      "action": "Run context and verify a deliberately invalid native-pet-to-web substitution record.",
-      "observed": "Context displayed native-pet intent and integration gaps; substituted web completion exited 1 with the expected rejection.",
-      "evidence": "harness/evidence/harness-runtime.txt"
+      "action": "Run node ../scripts/project-harness.mjs context from the existing character task directory.",
+      "observed": "The command reports feat/native-pet-harness, character = built-in pet, current integration gaps, and the handoff.",
+      "evidence": "harness/evidence/branch-integration-runtime.txt"
     },
     {
       "surface": "repository-harness",
       "kind": "test",
-      "action": "npm run check",
-      "observed": "Harness tests, core tests, web tests, type checking, kit validation, packaging, and production build passed.",
-      "evidence": "harness/evidence/repository-check.txt"
+      "action": "npm run check in the existing character-work checkout.",
+      "observed": "All 27 tests, typecheck, kit validation, packaging, and production build passed.",
+      "evidence": "harness/evidence/branch-integration-check.txt"
     }
   ],
   "remaining": [],
