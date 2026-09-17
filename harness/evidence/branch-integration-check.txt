@@ -1,0 +1,102 @@
+Command: npm run check
+Exit: 0
+
+
+> innercast-site@0.2.0 check
+> npm run harness:check && npm run test:harness && npm run typecheck && npm run test:innercast && npm run test:web && npm run validate:innercast && npm run package:innercast && npm run build
+
+
+> innercast-site@0.2.0 harness:check
+> node scripts/project-harness.mjs check
+
+Harness records valid. Task: in-progress. Native-pet product completion is not implied.
+
+> innercast-site@0.2.0 test:harness
+> node --test tests/harness/*.test.mjs
+
+✔ accepts native-pet completion only with its host observation record (3.471583ms)
+✔ rejects a web character substituted for a native pet (2.116ms)
+✔ rejects relabeled completion backed only by a web runtime or tests (0.922ms)
+✔ installation without visibility or requested behavior cannot complete (0.930875ms)
+✔ allows honest partial progress on a different surface (1.713167ms)
+✔ rejects completion with unfinished work and missing evidence (1.662209ms)
+✔ rejects absolute paths, traversal and symlink escape (1.354042ms)
+✔ keeps user intent separate from unsupported implementation claims (1.229458ms)
+✔ repository entry points and durable context remain connected (1.0745ms)
+✔ context runs from the nested kit directory without invoking models (172.515ms)
+✔ CLI rejects unknown commands and extra arguments (492.408667ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 833.947458
+
+> innercast-site@0.2.0 typecheck
+> tsc --noEmit
+
+
+> innercast-site@0.2.0 test:innercast
+> node --test innercast/tests/*.test.mjs
+
+✔ host-independent core modules do not import Node built-ins (3.294042ms)
+✔ pure core preserves the sample plan and current prompt contract (12.77675ms)
+✔ CLI keeps newline and golden output compatibility (502.680625ms)
+✔ shared host renderers exactly match checked-in canonical adapters (6.196875ms)
+✔ host registry separates public Gemini syntax from its internal tool contract (0.346708ms)
+✔ apps can inject a host registry without changing the compiler (0.965417ms)
+✔ definition hashes stay stable across object key order (1.348375ms)
+✔ budget accounting uses UTF-8 bytes and classifies oversized materialization (51.604958ms)
+✔ CLI rejects an oversized projected prompt before materialization (217.838583ms)
+✔ root package can import the public Innercast core entry point (2.028333ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1053.001459
+
+> innercast-site@0.2.0 test:web
+> node --experimental-strip-types --test tests/*.test.mjs
+
+✔ web prompt matches CLI compilation of the same decision brief (404.695958ms)
+✔ single-context fallback discloses simulation and visibility of earlier outputs (1.803708ms)
+✔ empty draft remains previewable and invalid input returns no copyable artifact (22.255167ms)
+✔ saved prompts stay snapshots until explicitly refreshed (1.335209ms)
+✔ storage keeps current snapshots, migrates legacy prompts, and preserves oversized drafts (9.800875ms)
+✔ Markdown export safely nests compiled prompt fences (11.130291ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 783.759417
+
+> innercast-site@0.2.0 validate:innercast
+> node innercast/scripts/validate.mjs
+
+Innercast validation passed: 3 same-task characters, host-owned synthesis, four runtime targets.
+
+> innercast-site@0.2.0 package:innercast
+> node innercast/scripts/package-kit.mjs
+
+Packaged Innercast kit: <repository>/public/innercast-kit.zip (61613 bytes)
+
+> innercast-site@0.2.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 1598 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.63 kB │ gzip:  0.38 kB
+dist/assets/index-GUHGcJYq.css   16.81 kB │ gzip:  4.21 kB
+dist/assets/index-CpJec6SH.js   260.51 kB │ gzip: 82.37 kB
+✓ built in 1.28s

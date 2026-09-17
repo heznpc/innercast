@@ -1,0 +1,73 @@
+Command (from innercast/): node ../scripts/project-harness.mjs context
+Exit: 0
+
+# Innercast task context
+
+Checkout: feat/native-pet-harness @ 648676f
+
+PRODUCT INTENT (not a host capability claim)
+Innercast characters are custom pets added to the host's built-in Pets surface, with appearance and behavior that respond to the user and session.
+Source: User clarification and request for a repository harness, 2026-09-17; summarized here, not a verbatim quotation.
+- Create or customize a character in Innercast.
+- Add it to the host's built-in pet list.
+- Observe its reactions inside that host.
+- An agent role or browser demo is not a substitute for the requested native pet.
+- An automatic reaction to frustration is distinct from a manually triggered pose.
+- Pinching is a separate interaction, not the cause required for the automatic reaction.
+- Pet reactions should not recreate the apology-message loop that consumes model tokens.
+
+CAPABILITIES (implemented means code exists; runtime proof is separate)
+- advisory-agent-kit: implemented. Existing compiler and generated agent configurations; this is supporting code, not a pet installer.
+- browser-preview: implemented. Existing website and prompt preview; not native-pet execution.
+- native-pet-installation: unverified. No Innercast pet installation and host-list visibility evidence is recorded in this checkout. Inspect the installed host contract before implementing.
+- session-reaction-bridge: unverified. Reading session signals and selecting native-pet reactions requires host capability verification. Prior conversation reports are not execution evidence.
+
+HANDOFF: Apply the repository harness to the existing character-work checkout.
+Status: in-progress; requested: repository-harness; delivered: repository-harness
+Integrated the existing refactor and native-pet harness history into the previously detached character-work checkout without overwriting local changes.
+Remaining: Run context and the complete checks in this checkout; record and push the integration.
+Product gap: Native-pet packaging, installation, and visibility have no recorded Innercast runtime proof.
+Product gap: Session observation and automatic native-pet reaction control remain unverified.
+Product gap: The public website and advisory skill still describe the existing agent kit; a pet product release is not implemented.
+Next action: Inspect the installed host's pet contract and supported reaction events; establish one Innercast pet installed and visible in the built-in pet list, preserving automatic reactions as a separate verification step.
+
+Read AGENTS.md and docs/development-harness.md. Update the handoff with the work.
+Existing forks/worktrees require integrating these commits; context is not synchronized automatically.
+
+Final handoff context:
+Exit: 0
+# Innercast task context
+
+Checkout: feat/native-pet-harness @ 648676f
+
+PRODUCT INTENT (not a host capability claim)
+Innercast characters are custom pets added to the host's built-in Pets surface, with appearance and behavior that respond to the user and session.
+Source: User clarification and request for a repository harness, 2026-09-17; summarized here, not a verbatim quotation.
+- Create or customize a character in Innercast.
+- Add it to the host's built-in pet list.
+- Observe its reactions inside that host.
+- An agent role or browser demo is not a substitute for the requested native pet.
+- An automatic reaction to frustration is distinct from a manually triggered pose.
+- Pinching is a separate interaction, not the cause required for the automatic reaction.
+- Pet reactions should not recreate the apology-message loop that consumes model tokens.
+
+CAPABILITIES (implemented means code exists; runtime proof is separate)
+- advisory-agent-kit: implemented. Existing compiler and generated agent configurations; this is supporting code, not a pet installer.
+- browser-preview: implemented. Existing website and prompt preview; not native-pet execution.
+- native-pet-installation: unverified. No Innercast pet installation and host-list visibility evidence is recorded in this checkout. Inspect the installed host contract before implementing.
+- session-reaction-bridge: unverified. Reading session signals and selecting native-pet reactions requires host capability verification. Prior conversation reports are not execution evidence.
+
+HANDOFF: Apply the repository harness to the existing character-work checkout.
+Status: complete; requested: repository-harness; delivered: repository-harness
+The existing character-work checkout now includes commit 648676f and its prerequisite history on feat/native-pet-harness. Its original innercast/ working directory runs the harness and loads the native-pet premise.
+Observed (runtime, repository-harness): The command reports feat/native-pet-harness, character = built-in pet, current integration gaps, and the handoff.
+Evidence: harness/evidence/branch-integration-runtime.txt
+Observed (test, repository-harness): All 27 tests, typecheck, kit validation, packaging, and production build passed.
+Evidence: harness/evidence/branch-integration-check.txt
+Product gap: Native-pet packaging, installation, and visibility have no recorded Innercast runtime proof.
+Product gap: Session observation and automatic native-pet reaction control remain unverified.
+Product gap: The public website and advisory skill still describe the existing agent kit; a pet product release is not implemented.
+Next action: Inspect the installed host's pet contract and supported reaction events; establish one Innercast pet installed and visible in the built-in pet list, preserving automatic reactions as a separate verification step.
+
+Read AGENTS.md and docs/development-harness.md. Update the handoff with the work.
+Existing forks/worktrees require integrating these commits; context is not synchronized automatically.

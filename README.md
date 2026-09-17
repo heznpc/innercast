@@ -1,13 +1,26 @@
 # Innercast
 
-Innercast is a character engine for AI work.
+Innercast's intended product is custom characters added to the AI host's
+built-in **Pets** surface, where they react to the user and session.
+
+**Implementation status:** this repository currently contains an advisory-agent
+compiler, installable agent configurations, and a browser preview. Native-pet
+installation and session-driven pet reactions are **unverified** here. An agent
+configuration or a browser character is not a completed native-pet integration.
+
+For development, run `npm run harness:context` first. The
+[development harness](docs/development-harness.md) records product intent,
+capability evidence, and the handoff for the next task. The
+[surface map](docs/surface-map.md) separates that intent from existing code.
+
+## Existing Advisory-Agent Capability
 
 One user-owned task is the decision space. Stable named character agents enter
 that task as an inner cast, examine the same decision from different
 perspectives, and report back. The root or main agent weighs the disagreement
 and makes the final call.
 
-The bundled cast currently includes:
+The existing advisory cast includes:
 
 | Character | Perspective | Advisory job |
 | --- | --- | --- |
@@ -57,8 +70,9 @@ This is the public source repository for Innercast:
 - GitHub Pages: <https://heznpc.github.io/innercast/>
 - Default branch: `main`
 
-The repository contains the adapter kit source plus a multilingual discovery
-page and browser-only preview.
+The repository contains the existing agent adapter kit, a multilingual discovery
+page and browser-only preview, and a repository development harness. The web
+copy and advisory skill still describe the agent kit; they are not a pet release.
 
 ## Repository Layout
 
@@ -69,7 +83,10 @@ innercast/scripts/          Node CLI, generator, installer, pack tools, and vali
 innercast/adapters/         Generated host-native agent definitions
 docs/user-guide.md          Installation and runtime usage
 docs/surface-map.md         Product boundary and support tiers
-src/                        Multilingual landing page and browser preview
+src/landing/                Landing page and multilingual copy
+src/workspace/              Case state, sidebar, cast preview, and decision journal
+src/session-prompt.mjs      Browser input mapping into the shared compiler and renderer
+src/utils/                  Browser clipboard and download helpers
 public/innercast-kit.zip    Downloadable kit artifact for the Pages site
 .github/workflows/          GitHub Pages deployment and validation workflow
 ```
@@ -103,6 +120,14 @@ Open `http://127.0.0.1:5176/`.
 
 The browser app previews the cast contract and creates a current-task session
 prompt. It does not claim to run live native subagents in the browser.
+
+The session prompt uses the canonical roster, compiler, budget checks, and
+execution-prompt renderer used by the CLI. It includes all host targets; the
+receiving host chooses its available native adapter or discloses fallback mode.
+The short voice cards remain illustrative local preview notes, not model output.
+Saved prompts stay snapshots until **Refresh prompt** is selected. If prompt
+generation fails validation or exceeds the budget, the draft remains editable
+with prompt copying and export disabled until a valid prompt can be generated.
 
 Compile a host-specific execution plan without calling a model:
 
@@ -152,13 +177,18 @@ examples.
 
 ## Product Boundary
 
-Innercast is not a separate deliberation service and does not require moving a
-decision into another chat. Its primary experience stays inside the AI task
-where the work already exists.
+The intended user experience is to create a character, add it to the host's
+built-in pet list, and observe its behavior there. Host support for installation,
+session signals, and reaction control must be verified independently.
 
-The adapter engine is the reusable core. The Pages site is only for discovery,
-documentation, download, and a lightweight preview. A hosted service or MCP
-server is optional future infrastructure, not the product premise.
+The existing adapter engine compiles advisory-agent definitions. The Pages site
+provides discovery, download, and a lightweight prompt preview. Neither surface
+establishes native-pet integration. No MCP server or standalone pet application
+is implemented by this repository.
+
+See the [development harness](docs/development-harness.md) before choosing an
+implementation target. Keep an unavailable host integration explicit instead
+of silently substituting a web demo or separate overlay.
 
 ## Language Policy
 

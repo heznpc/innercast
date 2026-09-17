@@ -28,14 +28,10 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Validate Innercast kit
-        run: npm run validate:innercast
+      - name: Check types, contracts, kit, and production build
+        run: npm run check
       - name: Audit dependencies
         run: npm audit --audit-level=moderate
-      - name: Package Innercast kit
-        run: npm run package:innercast
-      - name: Build
-        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

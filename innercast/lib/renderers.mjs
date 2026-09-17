@@ -115,12 +115,13 @@ export const renderExecutionPrompt = (output) => {
 
   if (selectedPlatform === "generic") {
     lines.push(
-      "Compatibility fallback: native subagent names, parallelism, and context isolation are not guaranteed on this host. If separate model contexts are available, run one per character in parallel. Otherwise run the character prompts in separate sections without blending their roles or exposing earlier character outputs to later characters.",
+      "Compatibility fallback: native subagent names, parallelism, and context isolation are not guaranteed on this host. If separate model contexts are available, run one per character in parallel. Otherwise render the character prompts as separate sections in one shared context and disclose that this is simulated role-play, not independent subagent review. Earlier sections remain visible to later sections; do not claim context isolation.",
       "",
     );
   } else if (selectedPlatform === "all") {
     lines.push(
       "Choose the best native target available on the current host. Dispatch every character independently and in parallel with the exact prompt assigned below. Wait for all results. Do not let one character see another character's private output during the cast wave.",
+      "If native agents are unavailable, use separate model contexts where supported. If only one context is available, render separate character sections and disclose simulated role-play: parallelism and context isolation are not provided, and earlier sections remain visible to later sections. Do not claim native agents were used.",
       "",
     );
   } else {

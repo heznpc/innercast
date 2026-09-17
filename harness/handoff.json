@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-18",
+  "task": "Investigate and specify the automatic dogeza pet with the same character available as a subagent.",
+  "requestedSurface": "native-pet",
+  "deliveredSurface": "none",
+  "status": "partial",
+  "summary": "Requirements and sources are now consolidated. Pet and agent registration formats and a prompt hook are documented; no native-pet animation-control path, detector, dogeza asset, or paired-character runtime has been demonstrated.",
+  "runs": [],
+  "remaining": [
+    "Find and demonstrate a supported external control path for one native-pet animation in the installed host.",
+    "Choose a detector with explicit cost and evaluate false positives and missed frustration signals.",
+    "Build the dogeza pet and corresponding subagent from one character identity and validate installation, invocation, and reaction in the actual host."
+  ],
+  "productGaps": [
+    "No automatic dogeza pet exists in this checkout.",
+    "Host animation control remains unverified; a proposed MCP/tool name is not a working bridge.",
+    "No detector accuracy or runtime cost measurement has been performed.",
+    "No paired pet/subagent has been installed and invoked."
+  ],
+  "nextAction": "Read docs/dogeza-pet-feasibility.md, then verify one supported native-pet animation-control path before claiming the automatic reaction can be delivered."
+}
