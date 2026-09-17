@@ -1,0 +1,243 @@
+Command: npm run check
+Exit: 0
+
+
+> innercast-site@0.2.0 check
+> npm run harness:check && npm run test:harness && npm run typecheck && npm run test:innercast && npm run test:web && npm run validate:innercast && npm run package:innercast && npm run build
+
+
+> innercast-site@0.2.0 harness:check
+> node scripts/project-harness.mjs check
+
+Harness records valid. Task: in-progress. Native-pet product completion is not implied.
+
+> innercast-site@0.2.0 test:harness
+> node --test tests/harness/*.test.mjs
+
+TAP version 13
+# Subtest: accepts native-pet completion only with its host observation record
+ok 1 - accepts native-pet completion only with its host observation record
+  ---
+  duration_ms: 2.236667
+  type: 'test'
+  ...
+# Subtest: rejects a web character substituted for a native pet
+ok 2 - rejects a web character substituted for a native pet
+  ---
+  duration_ms: 0.726375
+  type: 'test'
+  ...
+# Subtest: rejects relabeled completion backed only by a web runtime or tests
+ok 3 - rejects relabeled completion backed only by a web runtime or tests
+  ---
+  duration_ms: 0.6485
+  type: 'test'
+  ...
+# Subtest: installation without visibility or requested behavior cannot complete
+ok 4 - installation without visibility or requested behavior cannot complete
+  ---
+  duration_ms: 0.575833
+  type: 'test'
+  ...
+# Subtest: allows honest partial progress on a different surface
+ok 5 - allows honest partial progress on a different surface
+  ---
+  duration_ms: 0.937375
+  type: 'test'
+  ...
+# Subtest: rejects completion with unfinished work and missing evidence
+ok 6 - rejects completion with unfinished work and missing evidence
+  ---
+  duration_ms: 1.230459
+  type: 'test'
+  ...
+# Subtest: rejects absolute paths, traversal and symlink escape
+ok 7 - rejects absolute paths, traversal and symlink escape
+  ---
+  duration_ms: 0.5625
+  type: 'test'
+  ...
+# Subtest: keeps user intent separate from unsupported implementation claims
+ok 8 - keeps user intent separate from unsupported implementation claims
+  ---
+  duration_ms: 0.38475
+  type: 'test'
+  ...
+# Subtest: repository entry points and durable context remain connected
+ok 9 - repository entry points and durable context remain connected
+  ---
+  duration_ms: 0.591833
+  type: 'test'
+  ...
+# Subtest: context runs from the nested kit directory without invoking models
+ok 10 - context runs from the nested kit directory without invoking models
+  ---
+  duration_ms: 50.547667
+  type: 'test'
+  ...
+# Subtest: CLI rejects unknown commands and extra arguments
+ok 11 - CLI rejects unknown commands and extra arguments
+  ---
+  duration_ms: 74.178166
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 172.251458
+
+> innercast-site@0.2.0 typecheck
+> tsc --noEmit
+
+
+> innercast-site@0.2.0 test:innercast
+> node --test innercast/tests/*.test.mjs
+
+TAP version 13
+# Subtest: host-independent core modules do not import Node built-ins
+ok 1 - host-independent core modules do not import Node built-ins
+  ---
+  duration_ms: 0.959541
+  type: 'test'
+  ...
+# Subtest: pure core preserves the sample plan and current prompt contract
+ok 2 - pure core preserves the sample plan and current prompt contract
+  ---
+  duration_ms: 2.890667
+  type: 'test'
+  ...
+# Subtest: CLI keeps newline and golden output compatibility
+ok 3 - CLI keeps newline and golden output compatibility
+  ---
+  duration_ms: 92.18225
+  type: 'test'
+  ...
+# Subtest: shared host renderers exactly match checked-in canonical adapters
+ok 4 - shared host renderers exactly match checked-in canonical adapters
+  ---
+  duration_ms: 3.150375
+  type: 'test'
+  ...
+# Subtest: host registry separates public Gemini syntax from its internal tool contract
+ok 5 - host registry separates public Gemini syntax from its internal tool contract
+  ---
+  duration_ms: 0.138042
+  type: 'test'
+  ...
+# Subtest: apps can inject a host registry without changing the compiler
+ok 6 - apps can inject a host registry without changing the compiler
+  ---
+  duration_ms: 0.954833
+  type: 'test'
+  ...
+# Subtest: definition hashes stay stable across object key order
+ok 7 - definition hashes stay stable across object key order
+  ---
+  duration_ms: 2.071875
+  type: 'test'
+  ...
+# Subtest: budget accounting uses UTF-8 bytes and classifies oversized materialization
+ok 8 - budget accounting uses UTF-8 bytes and classifies oversized materialization
+  ---
+  duration_ms: 14.183833
+  type: 'test'
+  ...
+# Subtest: CLI rejects an oversized projected prompt before materialization
+ok 9 - CLI rejects an oversized projected prompt before materialization
+  ---
+  duration_ms: 40.057208
+  type: 'test'
+  ...
+# Subtest: root package can import the public Innercast core entry point
+ok 10 - root package can import the public Innercast core entry point
+  ---
+  duration_ms: 0.920542
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 201.29825
+
+> innercast-site@0.2.0 test:web
+> node --experimental-strip-types --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: web prompt matches CLI compilation of the same decision brief
+ok 1 - web prompt matches CLI compilation of the same decision brief
+  ---
+  duration_ms: 68.514458
+  type: 'test'
+  ...
+# Subtest: single-context fallback discloses simulation and visibility of earlier outputs
+ok 2 - single-context fallback discloses simulation and visibility of earlier outputs
+  ---
+  duration_ms: 2.030209
+  type: 'test'
+  ...
+# Subtest: empty draft remains previewable and invalid input returns no copyable artifact
+ok 3 - empty draft remains previewable and invalid input returns no copyable artifact
+  ---
+  duration_ms: 11.175917
+  type: 'test'
+  ...
+# Subtest: saved prompts stay snapshots until explicitly refreshed
+ok 4 - saved prompts stay snapshots until explicitly refreshed
+  ---
+  duration_ms: 1.1345
+  type: 'test'
+  ...
+# Subtest: storage keeps current snapshots, migrates legacy prompts, and preserves oversized drafts
+ok 5 - storage keeps current snapshots, migrates legacy prompts, and preserves oversized drafts
+  ---
+  duration_ms: 3.741833
+  type: 'test'
+  ...
+# Subtest: Markdown export safely nests compiled prompt fences
+ok 6 - Markdown export safely nests compiled prompt fences
+  ---
+  duration_ms: 4.077917
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 164.723875
+
+> innercast-site@0.2.0 validate:innercast
+> node innercast/scripts/validate.mjs
+
+Innercast validation passed: 3 same-task characters, host-owned synthesis, four runtime targets.
+
+> innercast-site@0.2.0 package:innercast
+> node innercast/scripts/package-kit.mjs
+
+Packaged Innercast kit: <repository>/public/innercast-kit.zip (61613 bytes)
+
+> innercast-site@0.2.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 1598 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.63 kB │ gzip:  0.38 kB
+dist/assets/index-GUHGcJYq.css   16.81 kB │ gzip:  4.21 kB
+dist/assets/index-CpJec6SH.js   260.51 kB │ gzip: 82.70 kB
+✓ built in 849ms

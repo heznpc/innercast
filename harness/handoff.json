@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-17",
+  "task": "Persist the native-pet product premise across development tasks.",
+  "requestedSurface": "repository-harness",
+  "deliveredSurface": "repository-harness",
+  "status": "complete",
+  "summary": "Repository entry points load native-pet intent, capability status, and task handoff. CLI and CI validate scope and completion evidence; no native-pet integration is claimed.",
+  "runs": [
+    {
+      "surface": "repository-harness",
+      "kind": "runtime",
+      "action": "Run context and verify a deliberately invalid native-pet-to-web substitution record.",
+      "observed": "Context displayed native-pet intent and integration gaps; substituted web completion exited 1 with the expected rejection.",
+      "evidence": "harness/evidence/harness-runtime.txt"
+    },
+    {
+      "surface": "repository-harness",
+      "kind": "test",
+      "action": "npm run check",
+      "observed": "Harness tests, core tests, web tests, type checking, kit validation, packaging, and production build passed.",
+      "evidence": "harness/evidence/repository-check.txt"
+    }
+  ],
+  "remaining": [],
+  "productGaps": [
+    "Native-pet packaging, installation, and visibility have no recorded Innercast runtime proof.",
+    "Session observation and automatic native-pet reaction control remain unverified.",
+    "The public website and advisory skill still describe the existing agent kit; a pet product release is not implemented."
+  ],
+  "nextAction": "Inspect the installed host's pet contract and supported reaction events; establish one Innercast pet installed and visible in the built-in pet list, preserving automatic reactions as a separate verification step."
+}

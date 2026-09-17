@@ -1,140 +1,63 @@
 # Innercast Surface Map
 
-Innercast is an internal character engine for an existing AI task, not a
-separate review destination.
+## Intended Product: Native Pets
 
-## Core Experience
-
-The product model is:
-
-1. One user-owned AI task is the decision space.
-2. Stable named character agents enter as distinct advisory voices.
-3. The characters inspect the same decision independently.
-4. The root or main agent identifies disagreements and makes the final call.
-5. Work continues in the same user task.
-
-“Same task” does not mean every host shares one literal model-context window.
-Codex, Claude Code, Gemini CLI, and future hosts may isolate subagents in child
-threads or worker contexts. The invariant is that the user does not have to
-move the decision into a separate Innercast session, and decision ownership
-returns to the root or main agent.
-
-## Internal Engine
-
-The adapter engine separates the portable character contract from host-specific
-files:
+An Innercast character means a custom pet added to the AI host's built-in
+Pets surface. The intended flow is:
 
 ```text
-Canonical character contract
-  -> explicit host selection + capability metadata
-  -> adapter rendering
-  -> execution plan and prompts
+Create or customize a character
+  -> add it to the host's built-in pet list
+  -> observe its reactions in that host
 ```
 
-The current core stops at compilation. It does not detect a running AI app,
-invoke a provider, collect character reports, or execute root synthesis. A host
-or future executor owns those runtime steps.
+This records user intent, not a claim that all host capabilities exist. Pet
+format, installation, session signals, and reaction control need independent
+verification. Automatic reactions to frustration and direct interactions such
+as pinching are separate behaviors. A manually triggered pose does not prove
+an automatic session reaction.
 
-The portable contract should preserve:
+The [development harness](development-harness.md) provides startup context and
+checks that completion records retain the requested target. Its machine-readable
+sources are `harness/product.json` and `harness/handoff.json`.
 
-- stable character id and display-name candidates
-- perspective and behavioral instructions
-- tool and permission boundaries where the host exposes them
-- input context and output shape
-- advisory status
-- root/main decision ownership
+## Existing Code and Gaps
 
-The host adapter owns syntax and invocation details. It must not silently claim
-capabilities that the host does not provide.
+| Surface | Existing role | What it does not establish |
+| --- | --- | --- |
+| `innercast/lib/` | Pure schema, compiler, renderers, and budget checks | Pet graphics, installation, or reaction execution |
+| `innercast/adapters/` | Generated Codex, Claude Code, and Gemini CLI advisory-agent definitions | A pet appearing in the host's pet list |
+| `innercast/SKILL.md` | Existing same-task advisory cast workflow | The complete pet product contract |
+| `innercast/packs/` | Existing portable advisory cast definitions | A host-compatible pet asset package |
+| `src/` and GitHub Pages | Discovery, download, browser notes, and prompt preview | Native-pet runtime or actual model-generated preview notes |
+| Repository harness | Product premise, handoff, and evidence checks | A pet runtime or automatic cross-session memory |
+| Native-pet installation | Unverified in this checkout | Do not report shipped without host evidence |
+| Session-to-pet reaction bridge | Unverified in this checkout | Do not infer event access or animation control from a sprite alone |
 
-## Default Surface: Native Character Agents
+## Advisory-Agent Compatibility
 
-Use `innercast/` as the primary surface.
+The existing compiler and kit remain usable. One task is the decision space;
+advisory agents inspect the decision, and the host retains the final call.
+Native named agents and disclosed single-prompt fallback are different
+execution modes. The compiler does not call models or collect agent results.
 
-Current generated adapter targets:
+The roster is `innercast/roster/innercast.roles.json`. Generated host adapters
+are derived artifacts. Current candidate character names remain candidates.
+See `docs/user-guide.md` for existing kit installation and use.
 
-- Codex: `innercast/adapters/codex/agents/*.toml`
-- Claude Code: `innercast/adapters/claude/agents/*.md`
-- Gemini CLI: `innercast/adapters/gemini/agents/*.md`
+These features are supporting capabilities. Their existence does not redefine
+the product as only a deliberation engine.
 
-The canonical roster remains at
-`innercast/roster/innercast.roles.json`. Candidate display names must remain
-marked as candidates until approved.
+## Delivery and Acceptance
 
-Where a host supports named custom agents, Innercast should use that native
-surface. This is the highest-fidelity experience because characters can be
-separate workers and may be visible by name in the host UI.
+Current delivery consists of a source repository, an agent-kit ZIP, and a Pages
+preview. There is no implemented MCP server or standalone pet application here.
+The pet distribution path is not complete merely because the agent installer
+or website builds.
 
-## Compatibility Surface: Explicit Fallback
-
-For an AI host without comparable custom agents, the engine may generate one
-prompt that asks the model to render separated character sections.
-
-Fallback mode must disclose that:
-
-- no native named subagents were invoked
-- the host may be using one model sequentially
-- character identity may not appear in the UI
-- parallelism and context isolation are not guaranteed
-
-The fallback preserves the decision ritual, not native-agent equivalence.
-
-## Shareable Surface: Character Packs
-
-Use `innercast/scripts/innercast-pack.mjs` for local, repository, or archive
-based character packs.
-
-A pack provides a portable cast definition. Generated adapters remain derived
-artifacts. Namespaced ids such as `<pack-id>-<character-id>` prevent downloaded
-packs from overwriting default agents.
-
-Useful commands include:
-
-- `init` and `validate` for authoring
-- `doctor` for name and contract risks
-- `diff` for reviewing pack changes
-- `export` and `install` for host-specific output
-
-A pack marketplace is not required for the core workflow.
-
-## Optional Surface: Landing Page and Playground
-
-The Pages site and `src/` app are discovery and preview surfaces.
-
-They may:
-
-- explain the character model
-- show the supported runtime tiers
-- preview the default cast
-- generate a prompt for the current AI task
-- link to the local engine kit
-
-They must not imply that browser-generated notes came from live native
-subagents. The real character experience belongs inside the user's AI runtime.
-
-## Optional Future Surface: MCP or Hosted Coordination
-
-Add MCP or hosted coordination only if a repeated workflow needs shared state
-or remote invocation across tools.
-
-Potentially valid reasons:
-
-- list and validate installed casts from multiple hosts
-- maintain an opt-in shared decision journal
-- invoke a cast through a host that exposes agent orchestration only by API
-- inspect adapter compatibility
-
-Invalid reasons:
-
-- moving every decision into a separate Innercast chat
-- treating prompt wrapping as a service
-- claiming native character identity on a host that does not expose it
-- assigning final authority to a character instead of the root or main agent
-
-## Non-Goals
-
-- a generic custom-agent marketplace
-- a pre-build handoff gate
-- a security or content-taint wrapper
-- a requirement to leave the current AI task
-- identical UI behavior across every AI product
+For native-pet work, acceptance requires the actual host/version, an installed
+character visible in its pet list, and the requested behavior observed there.
+Keep source intent, code existence, and runtime evidence separate. If host
+support is missing, record the limitation and next verification step. A web
+demo or external overlay may be an explicitly scoped experiment, but cannot
+silently replace the requested native pet.

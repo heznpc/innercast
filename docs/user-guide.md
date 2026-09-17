@@ -1,6 +1,11 @@
-# Innercast User Guide
+# Innercast Agent Kit User Guide
 
-Innercast installs a stable character roster into supported AI runtimes. The
+This guide documents the existing **advisory-agent kit**. It does not install
+characters in a host's built-in Pets list. Innercast's intended product is native
+pets; that installation and reaction path remains unverified in this checkout.
+See the [development harness](development-harness.md) for intent and status.
+
+The existing kit installs a stable advisory roster into supported AI runtimes. The
 characters deliberate inside the current user task; the root or main agent
 retains the final decision.
 

@@ -1,13 +1,26 @@
 # Innercast
 
-Innercast is a character engine for AI work.
+Innercast's intended product is custom characters added to the AI host's
+built-in **Pets** surface, where they react to the user and session.
+
+**Implementation status:** this repository currently contains an advisory-agent
+compiler, installable agent configurations, and a browser preview. Native-pet
+installation and session-driven pet reactions are **unverified** here. An agent
+configuration or a browser character is not a completed native-pet integration.
+
+For development, run `npm run harness:context` first. The
+[development harness](docs/development-harness.md) records product intent,
+capability evidence, and the handoff for the next task. The
+[surface map](docs/surface-map.md) separates that intent from existing code.
+
+## Existing Advisory-Agent Capability
 
 One user-owned task is the decision space. Stable named character agents enter
 that task as an inner cast, examine the same decision from different
 perspectives, and report back. The root or main agent weighs the disagreement
 and makes the final call.
 
-The bundled cast currently includes:
+The existing advisory cast includes:
 
 | Character | Perspective | Advisory job |
 | --- | --- | --- |
@@ -57,8 +70,9 @@ This is the public source repository for Innercast:
 - GitHub Pages: <https://heznpc.github.io/innercast/>
 - Default branch: `main`
 
-The repository contains the adapter kit source plus a multilingual discovery
-page and browser-only preview.
+The repository contains the existing agent adapter kit, a multilingual discovery
+page and browser-only preview, and a repository development harness. The web
+copy and advisory skill still describe the agent kit; they are not a pet release.
 
 ## Repository Layout
 
@@ -163,13 +177,18 @@ examples.
 
 ## Product Boundary
 
-Innercast is not a separate deliberation service and does not require moving a
-decision into another chat. Its primary experience stays inside the AI task
-where the work already exists.
+The intended user experience is to create a character, add it to the host's
+built-in pet list, and observe its behavior there. Host support for installation,
+session signals, and reaction control must be verified independently.
 
-The adapter engine is the reusable core. The Pages site is only for discovery,
-documentation, download, and a lightweight preview. A hosted service or MCP
-server is optional future infrastructure, not the product premise.
+The existing adapter engine compiles advisory-agent definitions. The Pages site
+provides discovery, download, and a lightweight prompt preview. Neither surface
+establishes native-pet integration. No MCP server or standalone pet application
+is implemented by this repository.
+
+See the [development harness](docs/development-harness.md) before choosing an
+implementation target. Keep an unavailable host integration explicit instead
+of silently substituting a web demo or separate overlay.
 
 ## Language Policy
 

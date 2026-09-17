@@ -13,7 +13,10 @@
     "typecheck": "tsc --noEmit",
     "validate:innercast": "node innercast/scripts/validate.mjs",
     "package:innercast": "node innercast/scripts/package-kit.mjs",
-    "check": "npm run typecheck && npm run test:innercast && npm run test:web && npm run validate:innercast && npm run package:innercast && npm run build"
+    "check": "npm run harness:check && npm run test:harness && npm run typecheck && npm run test:innercast && npm run test:web && npm run validate:innercast && npm run package:innercast && npm run build",
+    "harness:context": "node scripts/project-harness.mjs context",
+    "harness:check": "node scripts/project-harness.mjs check",
+    "test:harness": "node --test tests/harness/*.test.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

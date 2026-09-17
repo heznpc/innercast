@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "intent": {
+    "source": "User clarification and request for a repository harness, 2026-09-17; summarized here, not a verbatim quotation.",
+    "character": "native-pet",
+    "definition": "Innercast characters are custom pets added to the host's built-in Pets surface, with appearance and behavior that respond to the user and session.",
+    "journey": [
+      "Create or customize a character in Innercast.",
+      "Add it to the host's built-in pet list.",
+      "Observe its reactions inside that host."
+    ],
+    "constraints": [
+      "An agent role or browser demo is not a substitute for the requested native pet.",
+      "An automatic reaction to frustration is distinct from a manually triggered pose.",
+      "Pinching is a separate interaction, not the cause required for the automatic reaction.",
+      "Pet reactions should not recreate the apology-message loop that consumes model tokens."
+    ]
+  },
+  "harnessDefaults": {
+    "source": "Implementation choices for this harness, not additional user requirements.",
+    "surfaces": ["native-pet", "agent-adapter", "web-preview", "core", "repository-harness"],
+    "completion": "Record the actual target surface and runtime observation; tests alone do not establish native-pet integration."
+  },
+  "capabilities": [
+    {
+      "id": "advisory-agent-kit",
+      "status": "implemented",
+      "description": "Existing compiler and generated agent configurations; this is supporting code, not a pet installer.",
+      "evidence": ["innercast/scripts/install-adapters.mjs", "innercast/lib/compiler.mjs"]
+    },
+    {
+      "id": "browser-preview",
+      "status": "implemented",
+      "description": "Existing website and prompt preview; not native-pet execution.",
+      "evidence": ["src/App.tsx", "src/session-prompt.mjs"]
+    },
+    {
+      "id": "native-pet-installation",
+      "status": "unverified",
+      "description": "No Innercast pet installation and host-list visibility evidence is recorded in this checkout. Inspect the installed host contract before implementing.",
+      "evidence": []
+    },
+    {
+      "id": "session-reaction-bridge",
+      "status": "unverified",
+      "description": "Reading session signals and selecting native-pet reactions requires host capability verification. Prior conversation reports are not execution evidence.",
+      "evidence": []
+    }
+  ]
+}
